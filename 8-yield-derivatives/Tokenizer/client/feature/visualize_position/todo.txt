@@ -25,3 +25,15 @@ L'intervento si deve realizzare all'incirca dalla riga
 
 console.info('UserPosition complete data:', JSON.stringify(data, null, 2));
 
+
+https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleData
+
+
+{
+  "resource_address": "resource_tdx_2_1ngdmnv3jk6qlcl3scc4ufr2723vynr2zxr9c9zu3mu09t20sq674kk",
+  "non_fungible_ids": [
+    "{421ffeb0dd691a51-e276ab2d103f9d3f-de7add32a940027e-248acd3d617beff0}"
+  ]
+}
+
+
