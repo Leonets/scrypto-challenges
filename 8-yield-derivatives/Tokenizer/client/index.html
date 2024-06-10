@@ -126,6 +126,164 @@
       </div>
     </section>
 
+    <!-- Position Summary Mock Table to be studied about -->
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column center">
+            <h3>Position Summary</h3>
+        </div>
+        <div class="tabbed-panel">
+          <ul class="tabs">
+            <li class="tab-link active" data-tab="tab-supplied">Supplied</li>
+            <li class="tab-link" data-tab="tab-tokenized">Tokenized</li>
+          </ul>
+          <div id="tab-supplied" class="tab-content active">
+            <table>
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Amount</th>
+                  <th>Current API</th>
+                  <th>API Chart</th>
+                  <th>Supply Epoch</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>XRD</td><td>0</td><td>0%</td><td>Chart</td><td>0</td></tr>
+                <tr><td>USDC</td><td>0</td><td>0%</td><td>Chart</td><td>0</td></tr>
+                <tr><td>xWBTC</td><td>0</td><td>0%</td><td>Chart</td><td>0</td></tr>
+                <tr><td>xETH</td><td>0</td><td>0%</td><td>Chart</td><td>0</td></tr>
+                <tr><td>HUG</td><td>0</td><td>0%</td><td>Chart</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="tab-tokenized" class="tab-content">
+            <table>
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Amount</th>
+                  <th>Maturity Date</th>
+                  <th>Current Extra</th>
+                  <th>YT</th>
+                  <th>PT</th>
+                  <th>PT + YT</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>XRD</td><td>0</td><td>0</td><td>0</td>
+                  <td><button class="yt-button" data-token="XRD">swapYT</button></td>
+                  <td><button class="pt-button" data-token="XRD">swapPT</button></td>
+                  <td><button class="pt-yt-button" data-token="XRD">trade PT-YT</button></td>
+                </tr>
+                <tr>
+                  <td>USDC</td><td>0</td><td>0</td><td>0</td>
+                  <td><button class="yt-button" data-token="USDC">swapYT</button></td>
+                  <td><button class="pt-button" data-token="USDC">swapPT</button></td>
+                  <td><button class="pt-yt-button" data-token="USDC">trade PT-YT</button></td>
+                </tr>
+                <tr>
+                  <td>xWBTC</td><td>0</td><td>0</td><td>0</td>
+                  <td><button class="yt-button" data-token="xWBTC">swapYT</button></td>
+                  <td><button class="pt-button" data-token="xWBTC">swapPT</button></td>
+                  <td><button class="pt-yt-button" data-token="xWBTC">trade PT-YT</button></td>
+                </tr>
+                <tr>
+                  <td>xETH</td><td>0</td><td>0</td><td>0</td>
+                  <td><button class="yt-button" data-token="xETH">swapYT</button></td>
+                  <td><button class="pt-button" data-token="xETH">swapPT</button></td>
+                  <td><button class="pt-yt-button" data-token="xETH">trade PT-YT</button></td>
+                </tr>
+                <tr>
+                  <td>HUG</td><td>0</td><td>0</td><td>0</td>
+                  <td><button class="yt-button" data-token="HUG">swapYT</button></td>
+                  <td><button class="pt-button" data-token="HUG">swapPT</button></td>
+                  <td><button class="pt-yt-button" data-token="HUG">trade PT-YT</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- End Position Summary Mock table -->
+
+    <!-- Supply & Tokenized Mock Table to be studied about -->
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column center">
+            <h3>Operational Panel</h3>
+            <div id="buttonContainer">
+              <button class="token-button" data-token="XRD">XRD</button>
+              <button class="token-button" data-token="USDC">USDC</button>
+              <button class="token-button" data-token="xWBTC">xWBTC</button>
+              <button class="token-button" data-token="xETH">xETH</button>
+              <button class="token-button" data-token="HUG">HUG</button>
+            </div>
+          </div>
+          <div class="tabbed-panel">
+            <ul class="tabs">
+              <li class="tab-link2 active" data-tab2="tab-supply-withdraw">Supply & Withdraw</li>
+              <li class="tab-link2" data-tab2="tab-tokenize-redeem">Tokenize & Redeem</li>
+            </ul>
+            <div id="tab-supply-withdraw" class="tab-content2 active">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Token</th>
+                    <th>Supply</th>
+                    <th>Withdraw</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>XRD</td>
+                    <td>
+                      <input type="text" placeholder="Enter amount">
+                      <button class="supply-button">Supply</button>
+                    </td>
+                    <td>
+                      <input type="text" placeholder="Enter amount">
+                      <button class="withdraw-button">Withdraw</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="tab-tokenize-redeem" class="tab-content2">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Token</th>
+                    <th>Tokenize</th>
+                    <th>Redeem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>XRD</td>
+                    <td>
+                      <input type="text" placeholder="Enter amount">
+                      <button class="tokenize-button">Tokenize</button>
+                    </td>
+                    <td>
+                      <input type="text" placeholder="Enter amount">
+                      <button class="redeem-button">Redeem</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>          
+        </div>
+      </div>
+    </section>     
+    <!-- -->
+
+
     <section>
       <div class="content-wrapper">
         <div class="row-wrapper">

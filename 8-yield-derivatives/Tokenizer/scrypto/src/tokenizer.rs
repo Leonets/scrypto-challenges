@@ -159,7 +159,23 @@ struct StaffBadge {
 }
 
 
+#[derive(ScryptoSbor, ScryptoEvent)]
+struct InterestRateChangeEvent {
+    resource_address: ResourceAddress,
+    reward: Decimal,
+    epoch: Decimal,
+}
+
+#[derive(ScryptoSbor, ScryptoEvent)]
+struct ExtraInterestRateChangeEvent {
+    resource_address: ResourceAddress,
+    extra_reward: Decimal,
+    epoch: Decimal,
+}
+
+
 #[blueprint]
+#[events(InterestRateChangeEvent, ExtraInterestRateChangeEvent)]
 mod tokenizer {
     enable_method_auth! {
         roles {
@@ -195,6 +211,7 @@ mod tokenizer {
         nft_manager: ResourceManager,
         reward_type: String,
         interest_for_suppliers: AvlTree<Decimal, Decimal>,
+        interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>>,
         min_loan_limit: Decimal,
         max_loan_limit: Decimal,
         staff: AvlTree<u16, NonFungibleLocalId>,
@@ -249,6 +266,10 @@ mod tokenizer {
             //data struct for holding interest rates
             let mut lend_tree: AvlTree<Decimal, Decimal> = AvlTree::new();
             lend_tree.insert(Decimal::from(Runtime::current_epoch().number()), reward);
+            //data struct for holding interest rates changes for each resource address
+            let mut interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>> = HashMap::new();
+            interest_rate_changes.insert(resource_a, lend_tree);
+            interest_rate_changes.insert(resource_b, lend_tree);
             //staff container
             let staff: AvlTree<u16, NonFungibleLocalId> = AvlTree::new();
 
@@ -396,6 +417,7 @@ mod tokenizer {
                     nft_manager: nft_manager,
                     reward_type: reward_type,
                     interest_for_suppliers: lend_tree,
+                    interest_rate_changes: interest_rate_changes,
                     min_loan_limit: dec!(1),
                     max_loan_limit: dec!(10001),
                     staff: staff,
@@ -1101,9 +1123,11 @@ mod tokenizer {
         /// ```text
         #[doc = include_str!("../rtm/set_reward.rtm")]
         /// ```             
-        pub fn set_reward(&mut self, reward: Decimal) {
+        pub fn set_reward(&mut self, token_type: ResourceAddress, reward: Decimal) {
             self.reward = reward;
             self.interest_for_suppliers.insert(Decimal::from(Runtime::current_epoch().number()), reward);
+            //emit the event
+            Runtime::emit_event(InterestRateChangeEvent { resource_address: token_type, reward: reward, epoch: Decimal::from(Runtime::current_epoch().number()) });
         }
 
         /// Utility function: Set the extra reward for accounts locking their supplied liquidity
@@ -1119,8 +1143,10 @@ mod tokenizer {
         /// ```text
         #[doc = include_str!("../rtm/set_extra.rtm")]
         /// ```                     
-        pub fn set_extra_reward(&mut self, extra_reward: Decimal) {
+        pub fn set_extra_reward(&mut self, token_type: ResourceAddress, extra_reward: Decimal) {
             self.extra_reward = extra_reward;
+            //emit the event
+            Runtime::emit_event(ExtraInterestRateChangeEvent { resource_address: token_type, extra_reward: extra_reward, epoch: Decimal::from(Runtime::current_epoch().number()) });
         }
 
         /// Utility function: Set the reward type, if fixed or timebased
