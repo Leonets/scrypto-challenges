@@ -166,41 +166,24 @@
                   <th>Amount</th>
                   <th>Maturity Date</th>
                   <th>Current Extra</th>
-                  <th>YT</th>
-                  <th>PT</th>
-                  <th>PT + YT</th>
+                  <th>Total Interest at maturity</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>XRD</td><td>0</td><td>0</td><td>0</td>
-                  <td><button class="yt-button" data-token="XRD">swapYT</button></td>
-                  <td><button class="pt-button" data-token="XRD">swapPT</button></td>
-                  <td><button class="pt-yt-button" data-token="XRD">trade PT-YT</button></td>
+                  <td>XRD</td><td>0</td><td>0</td><td>0</td><td>0</td>
                 </tr>
                 <tr>
-                  <td>USDC</td><td>0</td><td>0</td><td>0</td>
-                  <td><button class="yt-button" data-token="USDC">swapYT</button></td>
-                  <td><button class="pt-button" data-token="USDC">swapPT</button></td>
-                  <td><button class="pt-yt-button" data-token="USDC">trade PT-YT</button></td>
+                  <td>USDC</td><td>0</td><td>0</td><td>0</td><td>0</td>
                 </tr>
                 <tr>
-                  <td>xWBTC</td><td>0</td><td>0</td><td>0</td>
-                  <td><button class="yt-button" data-token="xWBTC">swapYT</button></td>
-                  <td><button class="pt-button" data-token="xWBTC">swapPT</button></td>
-                  <td><button class="pt-yt-button" data-token="xWBTC">trade PT-YT</button></td>
+                  <td>xWBTC</td><td>0</td><td>0</td><td>0</td><td>0</td>
                 </tr>
                 <tr>
-                  <td>xETH</td><td>0</td><td>0</td><td>0</td>
-                  <td><button class="yt-button" data-token="xETH">swapYT</button></td>
-                  <td><button class="pt-button" data-token="xETH">swapPT</button></td>
-                  <td><button class="pt-yt-button" data-token="xETH">trade PT-YT</button></td>
+                  <td>xETH</td><td>0</td><td>0</td><td>0</td><td>0</td>
                 </tr>
                 <tr>
-                  <td>HUG</td><td>0</td><td>0</td><td>0</td>
-                  <td><button class="yt-button" data-token="HUG">swapYT</button></td>
-                  <td><button class="pt-button" data-token="HUG">swapPT</button></td>
-                  <td><button class="pt-yt-button" data-token="HUG">trade PT-YT</button></td>
+                  <td>HUG</td><td>0</td><td>0</td><td>0</td><td>0</td>
                 </tr>
               </tbody>
             </table>
@@ -259,7 +242,13 @@
                   <tr>
                     <th>Token</th>
                     <th>Tokenize</th>
-                    <th>Redeem</th>
+                    <th colspan="2">Redeem</th>
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Before Maturity</th>
+                    <th>After Maturity</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -270,8 +259,27 @@
                       <button class="tokenize-button">Tokenize</button>
                     </td>
                     <td>
+                      <button class="pt-yt-button" data-token="HUG">trade PT-YT</button>
+                    </td>                    
+                    <td>
                       <input type="text" placeholder="Enter amount">
                       <button class="redeem-button">Redeem</button>
+                      <button class="redeem-button">Claim Yield</button>
+                    </td>                 
+                  </tr>
+                  <tr>
+                    <td>USDC</td>
+                    <td>
+                      <input type="text" placeholder="Enter amount">
+                      <button class="tokenize-button">Tokenize</button>
+                    </td>
+                    <td>
+                      <button class="pt-yt-button" data-token="HUG">trade PT-YT</button>
+                    </td>                    
+                    <td>
+                      <input type="text" placeholder="Enter amount">
+                      <button class="redeem-button">Redeem</button>
+                      <button class="redeem-button">Claim Yield</button>
                     </td>
                   </tr>
                 </tbody>
