@@ -1,4 +1,4 @@
-# Tokenizer
+# LockOrSwap (ex Tokenizer)
 
 This whitepaper is to apply for the MVP Booster Grant (5000$).
 
@@ -32,8 +32,6 @@ Each account can provide liquidity in one or more of the available tokens and wi
 The rate is variable over time and the supplied liquidity can be withdrawn at any time.
 
 # Lock Liquidity
-
-//TODO
 
 Furthermore, liquidity can be blocked and this entitles the account to an extra reward percentage calculated on the amount of liquidity blocked (both that relating to your position and the overall pool) and the duration of the block.
 
@@ -71,8 +69,6 @@ Some formula have already been created for the Scrypto challenge, but to review 
 In particular, those relating to trading interest rates changes and those related to rewards for locking liquidity.
 
 ## New formulas to trading interest rates changes
-
-https://www.investopedia.com/terms/m/macaulayduration.asp
 
 To understand how a bond's price moves in response to changes in interest rates, we will use the Macaulay duration along with the concept of modified duration.
 

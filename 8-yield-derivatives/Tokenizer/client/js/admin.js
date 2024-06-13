@@ -139,6 +139,7 @@ function generateManifest(method, inputValue) {
           Decimal("1");
         CALL_METHOD
           Address("${componentAddress}")
+          Address("${token_type}")
           "set_reward"
           Decimal("${inputValue}");
         CALL_METHOD
@@ -147,6 +148,24 @@ function generateManifest(method, inputValue) {
           Expression("ENTIRE_WORKTOP");
        `;
       break;   
+      case 'set_extra_reward':
+        code = ` 
+          CALL_METHOD
+            Address("${accountAddress}")
+            "create_proof_of_amount"    
+            Address("${admin_badge}")
+            Decimal("1");
+          CALL_METHOD
+            Address("${componentAddress}")
+            Address("${token_type}")
+            "set_extra_reward"
+            Decimal("${inputValue}");
+          CALL_METHOD
+            Address("${accountAddress}")
+            "deposit_batch"
+            Expression("ENTIRE_WORKTOP");
+         `;
+        break;         
       case 'fund_main_pool':
         code = `
           CALL_METHOD
@@ -237,7 +256,7 @@ function generateManifest(method, inputValue) {
  * );
  * console.log(manifestConfig);
  */
-function generateManifestConfig(method, inputValue1, inputValue2, inputValue3, inputValue4, inputValue5) {
+function generateManifestConfig(method, inputValue1, inputValue2, inputValue3, inputValue4, inputValue5, inputValue6) {
   let code;
   switch (method) {
     case 'config':
@@ -255,6 +274,7 @@ function generateManifestConfig(method, inputValue1, inputValue2, inputValue3, i
           Decimal("${inputValue3}")
           Decimal("${inputValue4}")
           Decimal("${inputValue5}")
+          Address("${inputValue6}")
           ;
         CALL_METHOD
           Address("${accountAddress}")
@@ -294,15 +314,16 @@ function generateManifestConfig(method, inputValue1, inputValue2, inputValue3, i
  *   'config'
  * );
  */
-function createTransactionConfigOnClick(elementId, reward,extra_reward,tokenized_epoch_max_lenght,min_loan_limit,max_loan_limit,method) {
+function createTransactionConfigOnClick(elementId, reward,extra_reward,tokenized_epoch_max_lenght,min_loan_limit,max_loan_limit,resource_address,method) {
   document.getElementById(elementId).onclick = async function () {
     let inputValue1 = document.getElementById(reward).value;
     let inputValue2 = document.getElementById(extra_reward).value;
     let inputValue3 = document.getElementById(tokenized_epoch_max_lenght).value;
     let inputValue4 = document.getElementById(min_loan_limit).value;
     let inputValue5 = document.getElementById(max_loan_limit).value;
+    let inputValue6 = document.getElementById(resource_address).value;
 
-    const manifest = generateManifestConfig(method, inputValue1,inputValue2,inputValue3,inputValue4,inputValue5);
+    const manifest = generateManifestConfig(method, inputValue1,inputValue2,inputValue3,inputValue4,inputValue5, inputValue6);
     console.log(`${method} manifest`, manifest);
     const result = await rdt.walletApi.sendTransaction({
       transactionManifest: manifest,
@@ -324,4 +345,4 @@ createTransactionOnClick('addToken', 'tokenAddress', 'add_token');
 createTransactionOnClick('mintStaffBadge', 'staffUsername', 'mint_staff_badge');
 
 // Usage (Config, for Staff)
-createTransactionConfigOnClick('config', 'reward2','interest2','tokenized_epoch_max_lenght','min_loan_limit','max_loan_limit','config');
+createTransactionConfigOnClick('config', 'reward2','interest2','tokenized_epoch_max_lenght','min_loan_limit','max_loan_limit','resource_address','config');

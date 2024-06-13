@@ -83,6 +83,7 @@ resim run rtm/supply_high.rtm
 
 # 4000 xrd supplied in
 
+export token_type=$xrd
 export amount_reward='4'
 echo '>>> Set Reward '$amount_reward' at epoch 100'
 resim set-current-epoch 100
@@ -121,7 +122,7 @@ resim run rtm/set_extra.rtm
 
 export amount='2000'
 echo '>>> Redeem amount ' $amount
-resim run rtm/redeem.rtm
+resim run rtm/trade.rtm
 
 # 2000 xrd swapped
 echo 'Result after swapping after the interest rate drops'
@@ -144,7 +145,7 @@ resim run rtm/set_extra.rtm
 
 export amount='2000'
 echo '>>> Redeem amount ' $amount
-resim run rtm/redeem.rtm
+resim run rtm/trade.rtm
 
 # 2000 xrd swapped
 echo 'Result after swapping after the interest rate rise'

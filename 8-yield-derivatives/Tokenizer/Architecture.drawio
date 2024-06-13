@@ -1,0 +1,61 @@
+<mxfile host="Electron" modified="2024-06-13T13:34:35.556Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.5.1 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="WtwjAZdKZPCs4pb_gq5P" version="24.5.1" type="device">
+  <diagram name="Page-1" id="5f0bae14-7c28-e335-631c-24af17079c00">
+    <mxGraphModel dx="1574" dy="711" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="39150e848f15840c-2" value="Ledger On-Chain" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;points=[[0,0,0,0,0],[0,0,0,0,200],[0,0,0,0,400],[0,0,0,5,405],[0,0,0,10,410],[0,0,0,105,0],[0,0,0,115,410],[0,0,0,210,0],[0,0,0,215,5],[0,0,0,220,10],[0,0,0,220,210],[1,1,0,0,0]];" parent="1" vertex="1">
+          <mxGeometry x="70" y="80" width="330" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="qeGiwKbPCRYkaXKxbp3M-1" value="On-Chain Data" style="shape=internalStorage;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="140" width="140" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="qeGiwKbPCRYkaXKxbp3M-2" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="105" y="425" width="315" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="39150e848f15840c-3" value="Frontend" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12" parent="qeGiwKbPCRYkaXKxbp3M-2" vertex="1">
+          <mxGeometry width="315" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="39150e848f15840c-10" value="Fetching Event Data&lt;div&gt;(TypeScrypt)&lt;/div&gt;" style="shape=component;align=left;spacingLeft=36;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;html=1;" parent="qeGiwKbPCRYkaXKxbp3M-2" vertex="1">
+          <mxGeometry x="84.81" y="45" width="175.19" height="72.5" as="geometry" />
+        </mxCell>
+        <mxCell id="qeGiwKbPCRYkaXKxbp3M-11" value="Graph Rendering&lt;div&gt;(Javascript)&lt;/div&gt;" style="shape=component;align=left;spacingLeft=36;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;html=1;" vertex="1" parent="qeGiwKbPCRYkaXKxbp3M-2">
+          <mxGeometry x="84.81" y="135" width="155.19" height="72.5" as="geometry" />
+        </mxCell>
+        <mxCell id="qeGiwKbPCRYkaXKxbp3M-4" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="570" y="70" width="490" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="39150e848f15840c-1" value="Server1" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12" parent="qeGiwKbPCRYkaXKxbp3M-4" vertex="1">
+          <mxGeometry y="-24" width="490" height="384" as="geometry" />
+        </mxCell>
+        <mxCell id="39150e848f15840c-5" value="Event Retrieval&amp;nbsp;&lt;span style=&quot;background-color: initial;&quot;&gt;API&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;(Kotlin)&lt;/span&gt;&lt;/div&gt;" style="shape=component;align=left;spacingLeft=36;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;html=1;" parent="qeGiwKbPCRYkaXKxbp3M-4" vertex="1">
+          <mxGeometry x="270" y="180" width="170" height="114" as="geometry" />
+        </mxCell>
+        <mxCell id="qeGiwKbPCRYkaXKxbp3M-3" value="Events Database" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="qeGiwKbPCRYkaXKxbp3M-4">
+          <mxGeometry x="275.55555555555554" y="40" width="93.73333333333333" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="39150e848f15840c-7" value="Event Extractor&lt;div&gt;(Rust)&lt;/div&gt;" style="shape=component;align=left;spacingLeft=36;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;html=1;" parent="qeGiwKbPCRYkaXKxbp3M-4" vertex="1">
+          <mxGeometry x="35.55555555555556" y="104" width="195.55555555555554" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="qeGiwKbPCRYkaXKxbp3M-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qeGiwKbPCRYkaXKxbp3M-9" target="qeGiwKbPCRYkaXKxbp3M-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qeGiwKbPCRYkaXKxbp3M-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="39150e848f15840c-7" target="qeGiwKbPCRYkaXKxbp3M-9">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qeGiwKbPCRYkaXKxbp3M-9" value="Transaction Stream Endpoint" style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;direction=south;" vertex="1" parent="1">
+          <mxGeometry x="360" y="140" width="100" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="39150e848f15840c-12" style="edgeStyle=none;rounded=0;html=1;dashed=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=8;endArrow=open;endFill=0;endSize=16;fontFamily=Verdana;fontSize=12;" parent="1" source="39150e848f15840c-10" target="39150e848f15840c-5" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

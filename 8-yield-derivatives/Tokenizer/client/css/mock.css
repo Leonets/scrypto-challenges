@@ -40,6 +40,16 @@ th, td {
   text-align: left;
 }
 
+/* Token button */
+.token-button {
+  background-color: #008cba; /* Blue */
+  font-size: 18px;
+  color: white;
+  display: inline-block; /* Make buttons inline-block to fit them in a row */
+  padding: 10px 20px; /* Adjust padding as needed */
+  margin: 0; /* Ensure no extra margin is added */
+}
+
 
 /* Specific styles for YT, PT, and PT + YT buttons */
 .yt-button {

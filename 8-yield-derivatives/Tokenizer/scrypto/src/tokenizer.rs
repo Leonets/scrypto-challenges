@@ -32,9 +32,9 @@
 //! [tokenize_yield()][tokenizer::Tokenizer::tokenize_yield]
 //! Function for tokenizing and block the liquidity already supplied into the platform
 //! 
-//! ## Redeem
+//! ## Trade
 //!
-//! [redeem()][tokenizer::Tokenizer::redeem]
+//! [trade()][tokenizer::Tokenizer::trade]
 //! Function for withdrawing the locked liquidity before the maturity dat at the current market value as a function of the interest rate
 //! 
 //! ## Redeem from PT
@@ -196,7 +196,7 @@ mod tokenizer {
             add_token => restrict_to: [admin, OWNER];
             mint_staff_badge => restrict_to: [staff, admin, OWNER];
             tokenize_yield  => PUBLIC;
-            redeem => PUBLIC;
+            trade => PUBLIC;
             redeem_from_pt => PUBLIC;
             claim_yield => PUBLIC;
         }
@@ -210,7 +210,7 @@ mod tokenizer {
         tokenizer_manager: ResourceManager,
         nft_manager: ResourceManager,
         reward_type: String,
-        interest_for_suppliers: AvlTree<Decimal, Decimal>,
+        extra_interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>>,
         interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>>,
         min_loan_limit: Decimal,
         max_loan_limit: Decimal,
@@ -266,10 +266,27 @@ mod tokenizer {
             //data struct for holding interest rates
             let mut lend_tree: AvlTree<Decimal, Decimal> = AvlTree::new();
             lend_tree.insert(Decimal::from(Runtime::current_epoch().number()), reward);
+            //data struct for holding interest rates for the second predefined resource address (alpha release, set + 1)
+            let mut lend_tree_2: AvlTree<Decimal, Decimal> = AvlTree::new();
+            lend_tree_2.insert(Decimal::from(Runtime::current_epoch().number()), reward+1);      
+
+            //data struct for holding extra interest rates
+            let mut lend_tree_ext: AvlTree<Decimal, Decimal> = AvlTree::new();
+            lend_tree_ext.insert(Decimal::from(Runtime::current_epoch().number()), reward);
+            //data struct for holding extra interest rates for the second predefined resource address (alpha release, set + 1)
+            let mut lend_tree_ext_2: AvlTree<Decimal, Decimal> = AvlTree::new();
+            lend_tree_ext_2.insert(Decimal::from(Runtime::current_epoch().number()), reward+1);                  
+
             //data struct for holding interest rates changes for each resource address
             let mut interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>> = HashMap::new();
             interest_rate_changes.insert(resource_a, lend_tree);
-            interest_rate_changes.insert(resource_b, lend_tree);
+            interest_rate_changes.insert(resource_b, lend_tree_2);
+
+            //data struct for holding extra interest rates changes for each resource address
+            let mut extra_interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>> = HashMap::new();
+            extra_interest_rate_changes.insert(resource_a, lend_tree_ext);
+            extra_interest_rate_changes.insert(resource_b, lend_tree_ext_2);      
+
             //staff container
             let staff: AvlTree<u16, NonFungibleLocalId> = AvlTree::new();
 
@@ -416,7 +433,7 @@ mod tokenizer {
                     tokenize_epoch_max_lenght: dec!(518000),//how many days ??
                     nft_manager: nft_manager,
                     reward_type: reward_type,
-                    interest_for_suppliers: lend_tree,
+                    extra_interest_rate_changes: extra_interest_rate_changes,
                     interest_rate_changes: interest_rate_changes,
                     min_loan_limit: dec!(1),
                     max_loan_limit: dec!(10001),
@@ -459,7 +476,7 @@ mod tokenizer {
                         mint_staff_badge => Free, locked;
 
                         tokenize_yield => Xrd(10.into()), updatable;
-                        redeem => Xrd(10.into()), updatable;
+                        trade => Xrd(10.into()), updatable;
                         redeem_from_pt => Xrd(10.into()), updatable;
                         claim_yield => Xrd(10.into()), updatable;
                     }
@@ -719,55 +736,66 @@ mod tokenizer {
                 let amount_to_be_returned = refund.amount();
                 self.tokenizer_vault.put(refund);
 
-                //calculate interest over the epochs
-                let interest_totals = calculate_interests(
-                    &self.reward_type, &self.reward,
-                    data.start_supply_epoch.number(),
-                    &amount_to_be_returned, &self.interest_for_suppliers);
-                info!("Calculated interest {} ", interest_totals);
 
-                //total amount to return 
-                let amount_returned = amount_to_be_returned + interest_totals;
-                info!("tokens to be given back: {:?} ", amount_returned);  
-                
-                //total net amount to return
-                let vault = self.collected.get_mut(&token_type.clone());
-                
-                match vault {
-                    Some(fung_vault) => {
-                        info!("Returning tokens to the account, n°  {:?}", amount_returned);
-                        //getting tokens to be returned
-                        let bucket_returned = fung_vault.take(amount_returned);
+                match self.get_interest_for_supplier(&token_type) {
+                    Some(interest_for_supplier) => {
+                        println!("Found the AVL tree for the supplier.");
+                        //calculate interest over the epochs
+                        let interest_totals = calculate_interests(
+                            data.start_supply_epoch.number(),
+                            &amount_to_be_returned, interest_for_supplier);
+                        info!("Calculated interest {} ", interest_totals);
 
-                        // Update the data on the network
-                        let nft_local_id: NonFungibleLocalId = userdata_nft.as_non_fungible().non_fungible_local_id();
-                        if remaining_amount_to_return == dec!("0") {
-                            info!("set the supply operation as 'closed'");
-                            //here, we set the supply operation as 'closed' by setting 'end_supply_epoch'
-                            data.end_supply_epoch = Runtime::current_epoch();
-                            data.amount = remaining_amount_to_return;
-                            // Insert the modified data back into the hashmap
-                            liquidity_position.insert(token_type.clone(), data);
-                            self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);
+                        //total amount to return 
+                        let amount_returned = amount_to_be_returned + interest_totals;
+                        info!("tokens to be given back: {:?} ", amount_returned);  
 
-                            return (bucket_returned.into(),Some(userdata_nft))              
-                        } else {
-                            info!("set the supply operation as 'not closed', remaining {}", remaining_amount_to_return);
-                            //here, the supply operation is not 'closed' because some tokens are supplied in yet 
-                            data.amount = remaining_amount_to_return;
-                            // Insert the modified data back into the hashmap
-                            liquidity_position.insert(token_type.clone(), data);
-                            self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);
+                        //total net amount to return
+                        let vault = self.collected.get_mut(&token_type.clone());
 
-                            return (bucket_returned.into(),Some(userdata_nft))                
-                        }
-                    }
+                        match vault {
+                            Some(fung_vault) => {
+                                info!("Returning tokens to the account, n°  {:?}", amount_returned);
+                                //getting tokens to be returned
+                                let bucket_returned = fung_vault.take(amount_returned);
+
+                                // Update the data on the network
+                                let nft_local_id: NonFungibleLocalId = userdata_nft.as_non_fungible().non_fungible_local_id();
+                                if remaining_amount_to_return == dec!("0") {
+                                    info!("set the supply operation as 'closed'");
+                                    //here, we set the supply operation as 'closed' by setting 'end_supply_epoch'
+                                    data.end_supply_epoch = Runtime::current_epoch();
+                                    data.amount = remaining_amount_to_return;
+                                    // Insert the modified data back into the hashmap
+                                    liquidity_position.insert(token_type.clone(), data);
+                                    self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);
+
+                                    return (bucket_returned.into(),Some(userdata_nft))              
+                                } else {
+                                    info!("set the supply operation as 'not closed', remaining {}", remaining_amount_to_return);
+                                    //here, the supply operation is not 'closed' because some tokens are supplied in yet 
+                                    data.amount = remaining_amount_to_return;
+                                    // Insert the modified data back into the hashmap
+                                    liquidity_position.insert(token_type.clone(), data);
+                                    self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);
+
+                                    return (bucket_returned.into(),Some(userdata_nft))                
+                                }
+                            }
+                            None => {
+                                assert_pair("Unavailable Vault".to_string());
+                                let token_received = self.tokenizer_vault.take(dec!(0));
+                                return (token_received, None)                            
+                            }
+                        }                        
+                    },
                     None => {
-                        assert_pair("Unavailable Vault".to_string());
+                        assert_pair("No AVL tree found for calculating interest amount".to_string());
                         let token_received = self.tokenizer_vault.take(dec!(0));
-                        return (token_received, None)                            
-                    }
+                        return (token_received, None)        
+                    },
                 }
+                
             } else {
                 assert_pair("Unavailable liquidity_position of the specified token".to_string());
                 let token_received = self.tokenizer_vault.take(dec!(0));
@@ -902,11 +930,11 @@ mod tokenizer {
         /// **Access control:** Can be called by anyone.
         ///
         /// **Transaction manifest:**
-        /// `rtm/redeem.rtm`
+        /// `rtm/trade.rtm`
         /// ```text
-        #[doc = include_str!("../rtm/redeem.rtm")]
+        #[doc = include_str!("../rtm/trade.rtm")]
         /// ```     
-        pub fn redeem(
+        pub fn trade(
             &mut self, 
             pt_bucket: Bucket, 
             userdata_nft: NonFungibleBucket,
@@ -1099,6 +1127,15 @@ mod tokenizer {
                 yield_data.insert(token_type.clone(), data);
                 self.nft_manager.update_non_fungible_data(&nft_local_id, "yield_token_data", yield_data);
 
+                //I don't like this... but I need to update also the liquidity position with the extra reward
+                let mut liquidity_position = binding.liquidity_position;
+                if let Some(mut liq_data) = liquidity_position.remove(&token_type) {
+                    info!("Returning liquidity data of type  {:?}, amount {:?}", token_type, liq_data.amount);
+                    liq_data.amount = liq_data.amount + interest_totals;
+                    // Insert the modified data back into the hashmap
+                    liquidity_position.insert(token_type.clone(), liq_data);
+                }            
+
                 (net_returned, userdata_nft)
             } else {
                 assert_pair("No Yield available".to_string());
@@ -1110,6 +1147,7 @@ mod tokenizer {
         /// Utility function: Set the reward for suppliers
         /// 
         /// Arguments:
+        /// - `token_type`: The resource address of the token whose interest rate is changing
         /// - `reward`: The new 'interest rate' for account supplying liquidity
         /// 
         /// The new 'interest rate' is stored in the balanced binary search tree for then be used for reward calculations
@@ -1125,7 +1163,27 @@ mod tokenizer {
         /// ```             
         pub fn set_reward(&mut self, token_type: ResourceAddress, reward: Decimal) {
             self.reward = reward;
-            self.interest_for_suppliers.insert(Decimal::from(Runtime::current_epoch().number()), reward);
+
+            //add the new reward value in the proper avl-tree
+            // Get the current epoch
+            let epoch = Decimal::from(Runtime::current_epoch().number());
+
+            // Use match to handle the Option
+            match self.interest_rate_changes.get_mut(&token_type) {
+                Some(interest_tree) => {
+                    // Insert the value into the existing AvlTree
+                    interest_tree.insert(epoch, reward);
+                },
+                None => {
+                    // Create a new AvlTree and insert the value
+                    let mut new_tree = AvlTree::new();
+                    new_tree.insert(epoch, reward);
+
+                    // Insert the new AvlTree into the HashMap
+                    self.interest_rate_changes.insert(token_type, new_tree);
+                },
+            }            
+
             //emit the event
             Runtime::emit_event(InterestRateChangeEvent { resource_address: token_type, reward: reward, epoch: Decimal::from(Runtime::current_epoch().number()) });
         }
@@ -1133,6 +1191,7 @@ mod tokenizer {
         /// Utility function: Set the extra reward for accounts locking their supplied liquidity
         /// 
         /// Arguments:
+        /// - `token_type`: The resource address of the token whose interest rate is changing
         /// - `extra_reward`: The new extra 'interest rate' for accounts that will tokenize their liquidity provided from now on
         /// ---
         ///
@@ -1145,6 +1204,27 @@ mod tokenizer {
         /// ```                     
         pub fn set_extra_reward(&mut self, token_type: ResourceAddress, extra_reward: Decimal) {
             self.extra_reward = extra_reward;
+
+            // Add the new reward value in the proper avl-tree
+            // Get the current epoch
+            let epoch = Decimal::from(Runtime::current_epoch().number());
+
+            // Use match to handle the Option
+            match self.extra_interest_rate_changes.get_mut(&token_type) {
+                Some(interest_tree) => {
+                    // Insert the value into the existing AvlTree
+                    interest_tree.insert(epoch, extra_reward);
+                },
+                None => {
+                    // Create a new AvlTree and insert the value
+                    let mut new_tree = AvlTree::new();
+                    new_tree.insert(epoch, extra_reward);
+
+                    // Insert the new AvlTree into the HashMap
+                    self.interest_rate_changes.insert(token_type, new_tree);
+                },
+            }            
+
             //emit the event
             Runtime::emit_event(ExtraInterestRateChangeEvent { resource_address: token_type, extra_reward: extra_reward, epoch: Decimal::from(Runtime::current_epoch().number()) });
         }
@@ -1225,12 +1305,12 @@ mod tokenizer {
         /// **Access control:** Can be called by the Owner or the Admin or the Staff only.            
         pub fn config(&mut self, reward: Decimal, extra_reward: Decimal
                 , tokenize_epoch_max_lenght: Decimal
-                , min_loan_limit: Decimal, max_loan_limit: Decimal ) {                
-            self.set_reward(reward);
+                , min_loan_limit: Decimal, max_loan_limit: Decimal , token_type: ResourceAddress ) {                
+            self.set_reward(token_type, reward);
     
             //without methods
             self.tokenize_epoch_max_lenght = tokenize_epoch_max_lenght;
-            self.extra_reward = extra_reward;
+            self.set_extra_reward(token_type, extra_reward);
             self.min_loan_limit = min_loan_limit; //min limit 
             self.max_loan_limit = max_loan_limit; //max limit 
        
@@ -1292,6 +1372,30 @@ mod tokenizer {
 
             staff_badge_bucket
         }
+
+        /// Utility function: Get the AVL Tree of the specified token
+        /// 
+        /// Arguments:
+        /// - `token_address`: Token ResourceAddress
+        /// ---
+        ///
+        /// **Access control:** Not public
+        ///         
+        fn get_interest_for_supplier(&mut self, token_address: &ResourceAddress) -> Option<&AvlTree<Decimal, Decimal>> {
+            self.interest_rate_changes.get(token_address)
+        }
+
+        /// Utility function: Get the AVL Tree of the specified token (for extra reward)
+        /// 
+        /// Arguments:
+        /// - `token_address`: Token ResourceAddress
+        /// ---
+        ///
+        /// **Access control:** Not public
+        ///         
+        fn _get_extra_interest_for_supplier(&mut self, token_address: &ResourceAddress) -> Option<&AvlTree<Decimal, Decimal>> {
+            self.extra_interest_rate_changes.get(token_address)
+        }        
     
     }
 }

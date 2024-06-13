@@ -202,7 +202,7 @@ fn tokenizer_supply_tokenize_swap_success_test() -> Result<(), RuntimeError> {
     env.set_current_epoch(Epoch::of(1100));
     
     // Swap before maturity
-    let (liquid_bucket, userdata_nft) = tokenizerdapp.redeem(tokenized_bucket.into(), userdata_nft, XRD,&mut env)?;
+    let (liquid_bucket, userdata_nft) = tokenizerdapp.trade(tokenized_bucket.into(), userdata_nft, XRD,&mut env)?;
     assert_eq!(userdata_nft.unwrap().0.amount(&mut env)?, dec!("1"));
     assert_eq!(liquid_bucket.amount(&mut env)?, dec!(100.95583));
     println!("liquid_bucket from swap: {:?} ", liquid_bucket.amount(&mut env)?);  

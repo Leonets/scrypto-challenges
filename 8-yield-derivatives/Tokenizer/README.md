@@ -291,7 +291,7 @@ Then, you can execute all the following transaction manifest:
 
 - [redeem from pt](scrypto/stokenet/redeem_from_pt.rtm) -> redeem from principal token
 
-- [swap](scrypto/stokenet/redeem.rtm) -> swap principal token and yield
+- [swap](scrypto/stokenet/trade.rtm) -> swap principal token and yield
 
 - [register](scrypto/stokenet/register.rtm) -> register account
 
