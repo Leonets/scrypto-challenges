@@ -53,7 +53,7 @@ Architecture
 - Create a function for Trade a locked indipendently a PT or a YT position 
 - Create an Order Book for trading PT or YT separately
 
-# Current Bug
+## Current Bug
 
 - Extra amount coming from the yield claimed is not updated back as 'Liquidity Data' 
 (This means that this amount remain locked in the contract)
