@@ -134,6 +134,8 @@ export async function fetchComponentConfig(_componentAddress: any): Promise<Hash
     
     const currentEpoch = data.ledger_state.epoch;
 
+    console.log("json:", json);
+
     const rewardValue = getReward(json);
     const extrarewardValue = getExtraReward(json);
 
@@ -143,11 +145,46 @@ export async function fetchComponentConfig(_componentAddress: any): Promise<Hash
     if (currentRewardConfig) currentRewardConfig.textContent = rewardValue + '%' ?? '';
     if (currentExtraRewardConfig) currentExtraRewardConfig.textContent = extrarewardValue + '%' ?? '';
 
+    //extract values to fill in the new table
+    const mapOfRewards: Map<string, any> = getCurrentValues(json,"current_rewards");
+    const mapOfExtraRewards: Hashmap = getCurrentValues(json,"current_extra_rewards");
+    console.log("mapOfRewards:", mapOfRewards);
+    console.log("mapOfExtraRewards:", mapOfExtraRewards);
+
+    // Extract entries and convert them into a Map
+    const entriesArray = extractEntries(mapOfRewards.entries);
+    const extractedMap = new Map<string, number>();
+
+    entriesArray.forEach((entry: any) => {
+        const key = entry.key.value;
+        const value = parseFloat(entry.value.value); // Convert string to number if necessary
+        extractedMap.set(key, value);
+    });
+
+    // Log the map to verify
+    console.log("Extracted Map:", extractedMap);
+
+    const rewardXRD = document.getElementById("rewardXRD");
+    if (rewardXRD) rewardXRD.textContent = extractedMap.get("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc") ?? '';
+    const rewardUSDC = document.getElementById("rewardUSDC");
+    if (rewardUSDC) rewardUSDC.textContent = extractedMap.get("resource_tdx_2_1t57ejuayfdyrzn6wvzdw0u9lh5ae3u72c4pcxwmvvuf47q6jzk4xv2")  ?? '';
+
   })
   .catch(error => {
       console.error('Error fetching data:', error);
   });
   return hashmap;
+}
+
+// Function to handle both array and iterable cases
+function extractEntries(entries: any): [string, number][] {
+  if (Array.isArray(entries)) {
+      return entries;
+  }
+  if (typeof entries === 'function') {
+      return Array.from(entries());
+  }
+  throw new Error("Unsupported entries format");
 }
 
 
@@ -211,6 +248,12 @@ function getExtraReward(data: { details: { state: { fields: any[]; }; }; }) {
   const rewardField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "extra_reward");
   return rewardField ? rewardField.value : null;
 }
+
+function getCurrentValues(data: { details: { state: { fields: any[]; }; }; }, field_to_read: any): Map<string, any> {
+  const rewardField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === field_to_read);
+  return rewardField ? rewardField : null;
+}
+
 
 
 // *********** Fetch User NFT Metadata Information (/entity/details) (Gateway) ***********

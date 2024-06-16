@@ -210,6 +210,8 @@ mod tokenizer {
         tokenizer_manager: ResourceManager,
         nft_manager: ResourceManager,
         reward_type: String,
+        current_rewards: HashMap<ResourceAddress, Decimal>,
+        current_extra_rewards: HashMap<ResourceAddress, Decimal>,
         extra_interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>>,
         interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>>,
         min_loan_limit: Decimal,
@@ -286,6 +288,17 @@ mod tokenizer {
             let mut extra_interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>> = HashMap::new();
             extra_interest_rate_changes.insert(resource_a, lend_tree_ext);
             extra_interest_rate_changes.insert(resource_b, lend_tree_ext_2);      
+
+
+            //data struct for holding current interest rates
+            let mut current_rewards: HashMap<ResourceAddress, Decimal> = HashMap::new();
+            current_rewards.insert(resource_a, reward);
+            current_rewards.insert(resource_b, reward);
+            
+            //data struct for holding current extra interest rates (//TODO extra_reward has to a parameter of the instantiate function)
+            let mut current_extra_rewards: HashMap<ResourceAddress, Decimal> = HashMap::new();
+            current_extra_rewards.insert(resource_a, reward);
+            current_extra_rewards.insert(resource_b, reward);
 
             //staff container
             let staff: AvlTree<u16, NonFungibleLocalId> = AvlTree::new();
@@ -433,6 +446,8 @@ mod tokenizer {
                     tokenize_epoch_max_lenght: dec!(518000),//how many days ??
                     nft_manager: nft_manager,
                     reward_type: reward_type,
+                    current_rewards: current_rewards,
+                    current_extra_rewards: current_extra_rewards,
                     extra_interest_rate_changes: extra_interest_rate_changes,
                     interest_rate_changes: interest_rate_changes,
                     min_loan_limit: dec!(1),

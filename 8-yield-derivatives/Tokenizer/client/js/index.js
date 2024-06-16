@@ -302,7 +302,7 @@ function generateManifest(method, inputValue, inputValue2) {
           ;
             `;
         break;          
-        case 'trade':
+        case 'redeem':
             code = `
             CALL_METHOD
                 Address("${accountAddressFrom}")
@@ -393,7 +393,7 @@ function generateManifest(method, inputValue, inputValue2) {
             ;            
             CALL_METHOD
                 Address("${componentAddress}")
-                "redeem"
+                "trade"
                 Bucket("bucket1")
                 Bucket("bucket2")
                 Address("${tokenAddress}")
@@ -426,7 +426,7 @@ createTransactionOnClick('takes_back', 'numberOfLndTokens', 'accountAddress', 't
 // Functions for account tokenize/swap/reedem
 // Usage: createTransactionOnClick (elementId = divId of the button, inputTextId = divId of the input field, method = scrypto method, errorField = divId for showing back the error)
 createTransactionOnClick('tokenize', 'numberOfTokenizedZero', 'expectedTokenizeLength','tokenize', 'tokenizeTxResult');
-createTransactionOnClick('trade', 'numberOfRedeemedXrdTokens', 'accountAddress', 'trade', 'redeemTxResult');
+createTransactionOnClick('redeem', 'numberOfRedeemedXrdTokens', 'accountAddress', 'redeem', 'redeemTxResult');
 createTransactionOnClick('claim', 'numberOfClaimedXrdTokens', 'accountAddress', 'claim', 'claimedTxResult');
 createTransactionOnClick('swap', 'numberOfSwapXrdTokens', 'accountAddress', 'swap', 'SwapTxResult');
 
