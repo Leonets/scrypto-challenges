@@ -12,6 +12,7 @@
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <script type="module" src="js/admin.js"></script>
+  <script type="module" src="js/script-admin.js"></script>
 
   <div class="big-container header">
     <div class="header-wrapper" >
@@ -25,6 +26,24 @@
   </div>
 
   <input type="hidden" placeholder="Account address" id="accountAddress">
+
+  <section>
+    <div class="content-wrapper">
+      <div class="row-wrapper">
+        <div class="column center">
+          <h3>Choose the token you have to configure !</h3>
+          <select id="currencySelect">
+            <option value="XRD">XRD</option>
+            <option value="USDC">USDC</option>
+            <option value="xWBTC">xWBTC</option>
+            <option value="xETH">xETH</option>
+            <option value="HUG">HUG</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
   
   <section>
     <div class="content-wrapper">    

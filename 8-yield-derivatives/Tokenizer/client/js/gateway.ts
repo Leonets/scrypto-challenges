@@ -80,6 +80,7 @@ export function getTokenAddress(currency: string) {
 }
 
 let accountAddress: string | null;
+export let fungibleId: string | null;
 
 // ************ Fetch the user's account address (Page Load) ************
 rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
@@ -277,6 +278,8 @@ export async function fetchUserPosition(_accountAddress: string) {
       console.log(" NFT id " + JSON.stringify(result));
       //TODO controllare la presenza di items
       const itemsArray = result && result.length>0 ? result[0].items : null
+      //todo check what happens when itemsArray has size > 1 (btw that should not happen)
+      fungibleId = itemsArray;
       console.log(" itemsArray " + itemsArray);
       // Loop through itemsArray and make GET requests for each item
       itemsArray?.forEach(async (item: any) => {

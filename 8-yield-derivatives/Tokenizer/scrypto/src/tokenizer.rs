@@ -127,7 +127,7 @@ pub struct YieldTokenData {
     principal_returned: bool,
 }
 
-//Used to define methods for UserMultiPosition
+/// Used to define methods for UserMultiPosition
 impl UserMultiPosition {
     pub fn log_contents(&self) {
         info!("Logging UserMultiPosition contents:");
@@ -201,6 +201,27 @@ mod tokenizer {
             claim_yield => PUBLIC;
         }
     }
+
+    /// Data managed by the blueprint
+    // tokenizer_vault: Vault,                              -> Contains the token given back to accounts supplying liquidity
+    // collected: HashMap<ResourceAddress, FungibleVault>,  -> Contains the vaults where the supplied liquidity is stored
+    // reward: Decimal,                                     -> Current reward for accounts supplying liquidity (to be removed)
+    // extra_reward: Decimal,                               -> Current extra_reward for accounts locking liquidity (to be removed)
+    // tokenize_epoch_max_lenght: Decimal,                  -> Max length of the lock period
+    // tokenizer_manager: ResourceManager,                  -> Resource Manager for minting/burning PT/YT
+    // nft_manager: ResourceManager,                        -> Resource Manager for minting/updating UserPosition NFT
+    // reward_type: String,                                 -> not used
+    // current_rewards: HashMap<ResourceAddress, Decimal>,  -> Current reward for EACH TOKEN accounts supplying liquidity
+    // current_extra_rewards: HashMap<ResourceAddress, Decimal>,    -> Current extra_reward for EACH TOKEN accounts supplying liquidity
+    // extra_interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>>, -> Historic values of reward for EACH TOKEN accounts supplying liquidity (for showing the historic graph on the frontend)
+    // interest_rate_changes: HashMap<ResourceAddress, AvlTree<Decimal, Decimal>>,       -> Historic values of extra_reward for EACH TOKEN accounts supplying liquidity (for showing the historic graph on the frontend)
+    // min_loan_limit: Decimal,                             -> Current minimum amount of tokens that an account can supply in (to be refactored as an Hashmap because the values is token specific)
+    // max_loan_limit: Decimal,                             -> Current maximum amount of tokens that an account can supply in (to be refactored as an Hashmap because the values is token specific)
+    // staff: AvlTree<u16, NonFungibleLocalId>,             -> List of staff member NonFungibleLocalId
+    // pt_resource_manager: ResourceManager,                -> Resource manager for minting/burning PT
+    // staff_badge_resource_manager: ResourceManager,       -> Resource manager for minting/burning/recalling a Staff badge
+    // resource_a: ResourceAddress,                         -> Resource of the first token managed by the dApp
+    // resource_b: ResourceAddress                          -> Resource of the second token managed by the dApp
     struct Tokenizer<> {
         tokenizer_vault: Vault,
         collected: HashMap<ResourceAddress, FungibleVault>,
@@ -629,14 +650,16 @@ mod tokenizer {
         /// ```text
         #[doc = include_str!("../rtm/supply_high.rtm")]
         /// ```     
-        pub fn supply(&mut self, loan: FungibleBucket, userdata_nft: NonFungibleBucket, token_type: ResourceAddress) -> (Bucket, NonFungibleBucket) {
-            assert_resource(&userdata_nft.resource_address(), &self.nft_manager.address());
+        pub fn supply(&mut self, loan: FungibleBucket, userdata_nft_proof: NonFungibleProof, token_type: ResourceAddress) -> Bucket {
+            // Access control is effectively achieved through the use of the proof's resource address and nflid later.
+            let userdata_nft_proof = userdata_nft_proof.skip_checking();
+            let nft_local_id: NonFungibleLocalId = userdata_nft_proof.as_non_fungible().non_fungible_local_id();
+            let nfdata: UserMultiPosition = ResourceManager::from(userdata_nft_proof.resource_address()).get_non_fungible_data(&nft_local_id);
+        
+            assert_resource(&userdata_nft_proof.resource_address(), &self.nft_manager.address());
             assert_resource(&loan.resource_address(), &token_type);
             
-            let non_fung_bucket = userdata_nft.as_non_fungible();
-            let nft_local_id: NonFungibleLocalId = non_fung_bucket.non_fungible_local_id();
-            let binding = non_fung_bucket.non_fungible::<UserMultiPosition>().data();
-            let mut liquidity_position = binding.liquidity_position;
+            let mut liquidity_position = nfdata.liquidity_position;
 
             if let Some(mut data) = liquidity_position.remove(&token_type) {
                 info!("Supplying liquidity of type  {:?}, amount {:?}", token_type, data.amount);
@@ -672,7 +695,7 @@ mod tokenizer {
                 liquidity_position.insert(token_type.clone(), data);
                 self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);
 
-                return (token_received, userdata_nft)        
+                return token_received
             } else {
                 let num_tokens = loan.amount();
                 lend_amount_checks(num_tokens, self.min_loan_limit, self.max_loan_limit);
@@ -700,7 +723,7 @@ mod tokenizer {
                 liquidity_position.insert(token_type.clone(), liq_data);
                 self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);
 
-                return (token_received, userdata_nft)                
+                return token_received           
             }
         }
 
@@ -730,12 +753,16 @@ mod tokenizer {
         /// ```text
         #[doc = include_str!("../rtm/takes_back.rtm")]
         /// ```                
-        pub fn takes_back(&mut self, refund: Bucket, userdata_nft: NonFungibleBucket, token_type: ResourceAddress) -> (Bucket, Option<NonFungibleBucket>) {
-            assert_resource(&userdata_nft.resource_address(), &self.nft_manager.address());
+        pub fn takes_back(&mut self, refund: Bucket, userdata_nft_proof: Proof, token_type: ResourceAddress) -> Bucket {
+            // Access control is effectively achieved through the use of the proof's resource address and nflid later.
+            let userdata_nft_proof = userdata_nft_proof.skip_checking();
+            let nft_local_id: NonFungibleLocalId = userdata_nft_proof.as_non_fungible().non_fungible_local_id();
+            let nfdata: UserMultiPosition = ResourceManager::from(userdata_nft_proof.resource_address()).get_non_fungible_data(&nft_local_id);
+            
+            assert_resource(&userdata_nft_proof.resource_address(), &self.nft_manager.address());
+            assert_resource(&refund.resource_address(), &self.tokenizer_vault.resource_address());
 
-            let non_fung_bucket = userdata_nft.as_non_fungible();
-            let binding = non_fung_bucket.non_fungible::<UserMultiPosition>().data();
-            let mut liquidity_position = binding.liquidity_position;
+            let mut liquidity_position = nfdata.liquidity_position;
 
             if let Some(mut data) = liquidity_position.remove(&token_type) {
                 info!("Returning liquidity data of type  {:?}, amount {:?}", token_type, data.amount);
@@ -775,7 +802,7 @@ mod tokenizer {
                                 let bucket_returned = fung_vault.take(amount_returned);
 
                                 // Update the data on the network
-                                let nft_local_id: NonFungibleLocalId = userdata_nft.as_non_fungible().non_fungible_local_id();
+                                // let nft_local_id: NonFungibleLocalId = userdata_nft.as_non_fungible().non_fungible_local_id();
                                 if remaining_amount_to_return == dec!("0") {
                                     info!("set the supply operation as 'closed'");
                                     //here, we set the supply operation as 'closed' by setting 'end_supply_epoch'
@@ -785,7 +812,7 @@ mod tokenizer {
                                     liquidity_position.insert(token_type.clone(), data);
                                     self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);
 
-                                    return (bucket_returned.into(),Some(userdata_nft))              
+                                    return bucket_returned.into()            
                                 } else {
                                     info!("set the supply operation as 'not closed', remaining {}", remaining_amount_to_return);
                                     //here, the supply operation is not 'closed' because some tokens are supplied in yet 
@@ -794,27 +821,27 @@ mod tokenizer {
                                     liquidity_position.insert(token_type.clone(), data);
                                     self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);
 
-                                    return (bucket_returned.into(),Some(userdata_nft))                
+                                    return bucket_returned.into()                
                                 }
                             }
                             None => {
                                 assert_pair("Unavailable Vault".to_string());
                                 let token_received = self.tokenizer_vault.take(dec!(0));
-                                return (token_received, None)                            
+                                return token_received                      
                             }
                         }                        
                     },
                     None => {
                         assert_pair("No AVL tree found for calculating interest amount".to_string());
                         let token_received = self.tokenizer_vault.take(dec!(0));
-                        return (token_received, None)        
+                        return token_received       
                     },
                 }
                 
             } else {
                 assert_pair("Unavailable liquidity_position of the specified token".to_string());
                 let token_received = self.tokenizer_vault.take(dec!(0));
-                return (token_received, None)      
+                return token_received     
             }
 
         }
@@ -850,14 +877,12 @@ mod tokenizer {
         #[doc = include_str!("../rtm/tokenize_yield.rtm")]
         /// ```     
         pub fn tokenize_yield(
-            &mut self, 
-            tkn_token: Bucket,
-            tokenize_expected_length: Decimal,
-            userdata_nft: NonFungibleBucket,
-            token_type: ResourceAddress
-        ) -> (FungibleBucket, NonFungibleBucket) {
+            &mut self, tkn_token: Bucket, tokenize_expected_length: Decimal,
+            userdata_nft_proof: Proof, token_type: ResourceAddress
+        ) -> FungibleBucket {
             // assert_ne!(self.check_maturity(), true, "The expiry date has passed!");
             assert_eq!(tkn_token.resource_address(), self.tokenizer_manager.address());
+            assert_resource(&userdata_nft_proof.resource_address(), &self.nft_manager.address());
             epoch_max_length_checks(self.tokenize_epoch_max_lenght,tokenize_expected_length);
             epoch_min(tokenize_expected_length);
 
@@ -874,10 +899,14 @@ mod tokenizer {
             let accumulated_interest = calculate_interest(tokenize_expected_length, extra_interest, zsu_amount);  
             info!("Simple Interest to be paied {} at epoch {} for the tokenized", accumulated_interest, maturity_epoch);
             
-            let non_fung_bucket = userdata_nft.as_non_fungible();
-            let nft_local_id: NonFungibleLocalId = non_fung_bucket.non_fungible_local_id();
-            let binding = non_fung_bucket.non_fungible::<UserMultiPosition>().data();
-            let mut yield_data = binding.yield_token_data;
+            // let non_fung_bucket = userdata_nft.as_non_fungible();
+            // let nft_local_id: NonFungibleLocalId = non_fung_bucket.non_fungible_local_id();
+            // let binding = non_fung_bucket.non_fungible::<UserMultiPosition>().data();
+            // Access control is effectively achieved through the use of the proof's resource address and nflid later.
+            let userdata_nft_proof = userdata_nft_proof.skip_checking();
+            let nft_local_id: NonFungibleLocalId = userdata_nft_proof.as_non_fungible().non_fungible_local_id();
+            let nfdata: UserMultiPosition = ResourceManager::from(userdata_nft_proof.resource_address()).get_non_fungible_data(&nft_local_id);
+            let mut yield_data = nfdata.yield_token_data;
 
             if let Some(mut data) = yield_data.remove(&token_type) {
                 info!("Tokenize tokens of type  {:?}, amount {:?}", token_type, zsu_amount);
@@ -897,10 +926,10 @@ mod tokenizer {
                     yield_data.insert(token_type.clone(), data);
                     self.nft_manager.update_non_fungible_data(&nft_local_id, "yield_token_data", yield_data);
 
-                    return (pt_bucket, userdata_nft)
+                    return pt_bucket
                 } else {
                     assert_pair("You already have some tokenized liquidity ".to_string());
-                    return (scrypto::prelude::FungibleBucket(tkn_token), userdata_nft)
+                    return scrypto::prelude::FungibleBucket(tkn_token)
                 }
             } else {
                 info!("No Yield Data available");
@@ -919,7 +948,7 @@ mod tokenizer {
                 yield_data.insert(token_type.clone(), strip);
                 self.nft_manager.update_non_fungible_data(&nft_local_id, "yield_token_data", yield_data);
                 info!("New Yield Data has been creted in the account NFT");
-                return (pt_bucket, userdata_nft)
+                return pt_bucket
             }
         }     
 
@@ -952,18 +981,19 @@ mod tokenizer {
         pub fn trade(
             &mut self, 
             pt_bucket: Bucket, 
-            userdata_nft: NonFungibleBucket,
+            userdata_nft_proof: Proof,
             token_type: ResourceAddress
-        ) -> (Bucket, Option<NonFungibleBucket>) {
+        ) -> Bucket {
             
             let pt_redeem_amount = pt_bucket.amount();
             assert_eq!(pt_bucket.resource_address(), self.pt_resource_manager.address());
-            assert_eq!(userdata_nft.resource_address(), self.nft_manager.address());
+            assert_resource(&userdata_nft_proof.resource_address(), &self.nft_manager.address());
 
-            let non_fung_bucket = userdata_nft.as_non_fungible();
-            let nft_local_id: NonFungibleLocalId = non_fung_bucket.non_fungible_local_id();
-            let binding = non_fung_bucket.non_fungible::<UserMultiPosition>().data();
-            let mut yield_data = binding.yield_token_data;
+            // Update principal returned
+            let userdata_nft_proof = userdata_nft_proof.skip_checking();
+            let nft_local_id: NonFungibleLocalId = userdata_nft_proof.as_non_fungible().non_fungible_local_id();
+            let nfdata: UserMultiPosition = ResourceManager::from(userdata_nft_proof.resource_address()).get_non_fungible_data(&nft_local_id);
+            let mut yield_data = nfdata.yield_token_data;
 
             if let Some(data) = yield_data.remove(&token_type) {
                 info!("Swap tokens of type {:?}, amount locked {:?} until {:?}, now is epoch {} ", token_type, pt_redeem_amount, data.maturity_date, Runtime::current_epoch().number());
@@ -1003,9 +1033,9 @@ mod tokenizer {
                 //unlock the tokens                    
                 let zsu_bucket = self.tokenizer_vault.take(priced_amount);
 
-                return (zsu_bucket, Some(userdata_nft))
+                return zsu_bucket
             } else {
-                return (pt_bucket, Some(userdata_nft))
+                return pt_bucket
             }
         } 
                        
@@ -1042,18 +1072,19 @@ mod tokenizer {
         pub fn redeem_from_pt(
             &mut self,
             pt_bucket: FungibleBucket,
-            userdata_nft: NonFungibleBucket,
+            userdata_nft_proof: Proof,
             token_type: ResourceAddress
-        ) -> (Bucket, NonFungibleBucket) {
+        ) -> Bucket {
 
             info!("Returning PT amount {}", pt_bucket.amount());   
             assert_eq!(pt_bucket.resource_address(), self.pt_resource_manager.address());
+            assert_resource(&userdata_nft_proof.resource_address(), &self.nft_manager.address());
 
-            //update principal returned
-            let non_fung_bucket = userdata_nft.as_non_fungible();
-            let nft_local_id: NonFungibleLocalId = non_fung_bucket.non_fungible_local_id();
-            let binding = non_fung_bucket.non_fungible::<UserMultiPosition>().data();
-            let mut yield_data = binding.yield_token_data;
+            // Update principal returned
+            let userdata_nft_proof = userdata_nft_proof.skip_checking();
+            let nft_local_id: NonFungibleLocalId = userdata_nft_proof.as_non_fungible().non_fungible_local_id();
+            let nfdata: UserMultiPosition = ResourceManager::from(userdata_nft_proof.resource_address()).get_non_fungible_data(&nft_local_id);
+            let mut yield_data = nfdata.yield_token_data;
 
             if let Some(mut data) = yield_data.remove(&token_type) {
                 // To redeem PT only, must wait until after maturity.
@@ -1077,10 +1108,10 @@ mod tokenizer {
                 let bucket_of_zsu = self.tokenizer_vault.take(zsu_amount);
                 pt_bucket.burn();
    
-                return (bucket_of_zsu, userdata_nft)
+                return bucket_of_zsu
             } else {
                 assert_pair("No PT available".to_string());
-                return (pt_bucket.into(), userdata_nft)
+                return pt_bucket.into()
             }
         }
 
@@ -1112,15 +1143,17 @@ mod tokenizer {
         /// ```     
         pub fn claim_yield(
             &mut self, 
-            userdata_nft: NonFungibleBucket,
+            userdata_nft_proof: Proof,
             token_type: ResourceAddress
-        ) -> (Bucket, NonFungibleBucket) {
+        ) -> Bucket {
 
-            //update principal returned
-            let non_fung_bucket = userdata_nft.as_non_fungible();
-            let nft_local_id: NonFungibleLocalId = non_fung_bucket.non_fungible_local_id();
-            let binding = non_fung_bucket.non_fungible::<UserMultiPosition>().data();
-            let mut yield_data = binding.yield_token_data;
+            assert_resource(&userdata_nft_proof.resource_address(), &self.nft_manager.address());
+
+            // Update principal returned
+            let userdata_nft_proof = userdata_nft_proof.skip_checking();
+            let nft_local_id: NonFungibleLocalId = userdata_nft_proof.as_non_fungible().non_fungible_local_id();
+            let nfdata: UserMultiPosition = ResourceManager::from(userdata_nft_proof.resource_address()).get_non_fungible_data(&nft_local_id);
+            let mut yield_data = nfdata.yield_token_data;
 
             if let Some(mut data) = yield_data.remove(&token_type) {
                 // To claim yield only, must wait until after maturity.
@@ -1143,7 +1176,7 @@ mod tokenizer {
                 self.nft_manager.update_non_fungible_data(&nft_local_id, "yield_token_data", yield_data);
 
                 //I don't like this... but I need to update also the liquidity position with the extra reward
-                let mut liquidity_position = binding.liquidity_position;
+                let mut liquidity_position = nfdata.liquidity_position;
                 if let Some(mut liq_data) = liquidity_position.remove(&token_type) {
                     info!("Returning liquidity data of type  {:?}, amount {:?}", token_type, liq_data.amount);
                     liq_data.amount = liq_data.amount + interest_totals;
@@ -1151,11 +1184,11 @@ mod tokenizer {
                     liquidity_position.insert(token_type.clone(), liq_data);
                 }            
 
-                (net_returned, userdata_nft)
+                net_returned
             } else {
                 assert_pair("No Yield available".to_string());
                 let net_returned = self.tokenizer_vault.take(dec!(0));
-                return (net_returned, userdata_nft)
+                return net_returned
             }
         }
         
@@ -1236,7 +1269,7 @@ mod tokenizer {
                     new_tree.insert(epoch, extra_reward);
 
                     // Insert the new AvlTree into the HashMap
-                    self.interest_rate_changes.insert(token_type, new_tree);
+                    self.extra_interest_rate_changes.insert(token_type, new_tree);
                 },
             }            
 

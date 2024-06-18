@@ -1,6 +1,6 @@
 import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType, OneTimeDataRequestBuilder } from '@radixdlt/radix-dapp-toolkit'
 import { rdt } from './gateway.ts'; 
-import { getTokenAddress, fetchComponentConfig } from './gateway.ts';
+import { getTokenAddress, fetchComponentConfig, fungibleId } from './gateway.ts';
 
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment (index.js): ", environment)
@@ -162,6 +162,7 @@ function createTransactionOnButtonClick(elementId, method, errorField) {
  */
 function generateManifest(method, inputValue, inputValue2) {
   let code;
+  //todo get this accountAddressfrom somewhere else
   let accountAddressFrom = document.getElementById('accountAddress').value;
   let tokenAddress = getTokenAddress(currencySelect.value);
   console.log(`Working with this token type ${tokenAddress} `);
@@ -175,24 +176,23 @@ function generateManifest(method, inputValue, inputValue2) {
           Decimal("${inputValue}");
         TAKE_ALL_FROM_WORKTOP
           Address("${tokenAddress}")
-          Bucket("xrd");
+          Bucket("xrd");  
         CALL_METHOD
-          Address("${accountAddressFrom}")
-          "withdraw"    
-          Address("${lnd_resourceAddress}")
-          Decimal("1");
-        TAKE_ALL_FROM_WORKTOP
-          Address("${lnd_resourceAddress}")
-          Bucket("nft");    
+            Address("${accountAddressFrom}")
+            "create_proof_of_non_fungibles"
+            Address("${lnd_resourceAddress}")
+            Array<NonFungibleLocalId>(NonFungibleLocalId("${fungibleId}"));
+        POP_FROM_AUTH_ZONE
+            Proof("MyNFTData");        
         CALL_METHOD
           Address("${componentAddress}")
           "supply"
           Bucket("xrd")
-          Bucket("nft")
+          Proof("MyNFTData")
           Address("${tokenAddress}");
         CALL_METHOD
           Address("${accountAddressFrom}")
-          "try_deposit_batch_or_refund"
+          "deposit_batch"
           Expression("ENTIRE_WORKTOP")
           Enum<0u8>();
           `;
@@ -241,23 +241,21 @@ function generateManifest(method, inputValue, inputValue2) {
           Decimal("${inputValue}")
           Bucket("loan");
         CALL_METHOD
-          Address("${accountAddressFrom}")
-          "withdraw"    
-          Address("${lnd_resourceAddress}")
-          Decimal("1");
-        TAKE_FROM_WORKTOP
-          Address("${lnd_resourceAddress}")
-          Decimal("1")
-          Bucket("nft");           
+            Address("${accountAddressFrom}")
+            "create_proof_of_non_fungibles"
+            Address("${lnd_resourceAddress}")
+            Array<NonFungibleLocalId>(NonFungibleLocalId("${fungibleId}"));
+        POP_FROM_AUTH_ZONE
+            Proof("MyNFTData");             
         CALL_METHOD
           Address("${componentAddress}")
           "takes_back"
           Bucket("loan")
-          Bucket("nft")
+          Proof("MyNFTData")
           Address("${tokenAddress}");
         CALL_METHOD
           Address("${accountAddressFrom}")
-          "try_deposit_batch_or_refund"
+          "deposit_batch"
           Expression("ENTIRE_WORKTOP")
           Enum<0u8>();
           `;
@@ -296,7 +294,7 @@ function generateManifest(method, inputValue, inputValue2) {
           ;
           CALL_METHOD
               Address("${accountAddressFrom}")
-              "try_deposit_batch_or_refund"
+              "deposit_batch"
               Expression("ENTIRE_WORKTOP")
               Enum<0u8>()
           ;
@@ -335,7 +333,7 @@ function generateManifest(method, inputValue, inputValue2) {
             ;
             CALL_METHOD
                 Address("${accountAddressFrom}")
-                "try_deposit_batch_or_refund"
+                "deposit_batch"
                 Expression("ENTIRE_WORKTOP")
                 Enum<0u8>()
             ;
@@ -362,7 +360,7 @@ function generateManifest(method, inputValue, inputValue2) {
               ;
               CALL_METHOD
                   Address("${accountAddressFrom}")
-                  "try_deposit_batch_or_refund"
+                  "deposit_batch"
                   Expression("ENTIRE_WORKTOP")
                   Enum<0u8>()
               ;`;
@@ -400,7 +398,7 @@ function generateManifest(method, inputValue, inputValue2) {
             ;
             CALL_METHOD
                 Address("${accountAddressFrom}")
-                "try_deposit_batch_or_refund"
+                "deposit_batch"
                 Expression("ENTIRE_WORKTOP")
                 Enum<0u8>()
             ;`;

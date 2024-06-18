@@ -90,6 +90,8 @@ resim run rtm/register.rtm
 
 export resource_address=resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3
 
+export fungibleId=$(resim show $account | awk '/Tokenizer AccountData/{flag=1; next} /resource_sim1/ && flag{flag=0} flag' | sed -n 's/^[[:space:]]*└─ //p')
+
 export token_type=$xrd
 export amount_reward='10'
 echo '>>> Set Reward '$amount_reward' at epoch 1'

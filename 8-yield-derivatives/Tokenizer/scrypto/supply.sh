@@ -74,6 +74,13 @@ export account=$owner_account
 echo '>>> Register'
 resim run rtm/register.rtm
 
+export fungibleId=$(resim show $account | awk '/Tokenizer AccountData/{flag=1; next} /resource_sim1/ && flag{flag=0} flag' | sed -n 's/^[[:space:]]*└─ //p')
+
+echo '>>> Fungible Id of the UserAccountData'
+echo $fungibleId
+
+echo '>>> Owner Account'
+resim show $owner_account
 
 export resource_address=resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3
 
