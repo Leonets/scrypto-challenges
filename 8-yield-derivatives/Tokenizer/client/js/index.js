@@ -193,8 +193,7 @@ function generateManifest(method, inputValue, inputValue2) {
         CALL_METHOD
           Address("${accountAddressFrom}")
           "deposit_batch"
-          Expression("ENTIRE_WORKTOP")
-          Enum<0u8>();
+          Expression("ENTIRE_WORKTOP");
           `;
       break;
     case 'register':
@@ -256,8 +255,7 @@ function generateManifest(method, inputValue, inputValue2) {
         CALL_METHOD
           Address("${accountAddressFrom}")
           "deposit_batch"
-          Expression("ENTIRE_WORKTOP")
-          Enum<0u8>();
+          Expression("ENTIRE_WORKTOP");
           `;
       break; 
       case 'tokenize':
@@ -274,30 +272,24 @@ function generateManifest(method, inputValue, inputValue2) {
               Bucket("bucket1")
           ;
           CALL_METHOD
-              Address("${accountAddressFrom}")
-              "withdraw"
-              Address("${lnd_resourceAddress}")
-              Decimal("1")
-          ;
-          TAKE_FROM_WORKTOP
-              Address("${lnd_resourceAddress}")
-              Decimal("1")
-              Bucket("bucket2")
-          ;
+            Address("${accountAddressFrom}")
+            "create_proof_of_non_fungibles"
+            Address("${lnd_resourceAddress}")
+            Array<NonFungibleLocalId>(NonFungibleLocalId("${fungibleId}"));
+          POP_FROM_AUTH_ZONE
+              Proof("MyNFTData");         
           CALL_METHOD
               Address("${componentAddress}")
               "tokenize_yield"
               Bucket("bucket1")
               Decimal("${inputValue2}")
-              Bucket("bucket2")
+              Proof("MyNFTData")
               Address("${tokenAddress}")
           ;
           CALL_METHOD
               Address("${accountAddressFrom}")
               "deposit_batch"
-              Expression("ENTIRE_WORKTOP")
-              Enum<0u8>()
-          ;
+              Expression("ENTIRE_WORKTOP");
             `;
         break;          
         case 'redeem':
@@ -314,70 +306,54 @@ function generateManifest(method, inputValue, inputValue2) {
                 Bucket("bucket1")
             ;
             CALL_METHOD
-                Address("${accountAddressFrom}")
-                "withdraw"
-                Address("${lnd_resourceAddress}")
-                Decimal("1")
-            ;
-            TAKE_FROM_WORKTOP
-                Address("${lnd_resourceAddress}")
-                Decimal("1")
-                Bucket("bucket2")
-            ;
+              Address("${accountAddressFrom}")
+              "create_proof_of_non_fungibles"
+              Address("${lnd_resourceAddress}")
+              Array<NonFungibleLocalId>(NonFungibleLocalId("${fungibleId}"));
+            POP_FROM_AUTH_ZONE
+                Proof("MyNFTData");   
             CALL_METHOD
                 Address("${componentAddress}")
                 "redeem_from_pt"
                 Bucket("bucket1")
-                Bucket("bucket2")
+                Proof("MyNFTData")
                 Address("${tokenAddress}")
             ;
             CALL_METHOD
                 Address("${accountAddressFrom}")
                 "deposit_batch"
-                Expression("ENTIRE_WORKTOP")
-                Enum<0u8>()
-            ;
+                Expression("ENTIRE_WORKTOP");
             `;
           break;    
           case 'claim':
               code = `
               CALL_METHOD
-                  Address("${accountAddressFrom}")
-                  "withdraw"
-                  Address("${lnd_resourceAddress}")
-                  Decimal("1")
-              ;
-              TAKE_FROM_WORKTOP
-                  Address("${lnd_resourceAddress}")
-                  Decimal("1")
-                  Bucket("bucket1")
-              ;
+                Address("${accountAddressFrom}")
+                "create_proof_of_non_fungibles"
+                Address("${lnd_resourceAddress}")
+                Array<NonFungibleLocalId>(NonFungibleLocalId("${fungibleId}"));
+              POP_FROM_AUTH_ZONE
+                  Proof("MyNFTData");   
               CALL_METHOD
                   Address("${componentAddress}")
                   "claim_yield"
-                  Bucket("bucket1")
+                  Proof("MyNFTData")
                   Address("${tokenAddress}")
               ;
               CALL_METHOD
                   Address("${accountAddressFrom}")
                   "deposit_batch"
-                  Expression("ENTIRE_WORKTOP")
-                  Enum<0u8>()
-              ;`;
+                  Expression("ENTIRE_WORKTOP");`;
             break;       
           case 'swap':
             code = `
             CALL_METHOD
-                Address("${accountAddressFrom}")
-                "withdraw"
-                Address("${lnd_resourceAddress}")
-                Decimal("1")
-            ;
-            TAKE_FROM_WORKTOP
-                Address("${lnd_resourceAddress}")
-                Decimal("1")
-                Bucket("bucket2")
-            ;
+              Address("${accountAddressFrom}")
+              "create_proof_of_non_fungibles"
+              Address("${lnd_resourceAddress}")
+              Array<NonFungibleLocalId>(NonFungibleLocalId("${fungibleId}"));
+            POP_FROM_AUTH_ZONE
+                Proof("MyNFTData");   
             CALL_METHOD
                 Address("${accountAddressFrom}")
                 "withdraw"
@@ -393,15 +369,13 @@ function generateManifest(method, inputValue, inputValue2) {
                 Address("${componentAddress}")
                 "trade"
                 Bucket("bucket1")
-                Bucket("bucket2")
+                Proof("MyNFTData")
                 Address("${tokenAddress}")
             ;
             CALL_METHOD
                 Address("${accountAddressFrom}")
                 "deposit_batch"
-                Expression("ENTIRE_WORKTOP")
-                Enum<0u8>()
-            ;`;
+                Expression("ENTIRE_WORKTOP");`;
           break;                                                                       
     // Add more cases as needed
     default:
