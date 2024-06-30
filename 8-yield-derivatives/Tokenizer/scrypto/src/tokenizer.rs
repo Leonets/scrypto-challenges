@@ -335,6 +335,11 @@ mod tokenizer {
                         "symbol" => "Tokenizer Owner", locked;
                         "description" => "A badge to be used for some extra-special administrative function", locked;
                     }))
+                    //temporary to avoid a messy wallet
+                    .burn_roles(burn_roles!(
+                        burner => rule!(require(global_caller(component_address)));
+                        burner_updater => OWNER;
+                    ))
                     .divisibility(DIVISIBILITY_NONE)
                     .mint_initial_supply(1);
 
@@ -351,6 +356,11 @@ mod tokenizer {
                 .mint_roles(mint_roles! (
                         minter => rule!(require(global_caller(component_address)));
                         minter_updater => OWNER;
+                ))
+                //temporary to avoid a messy wallet
+                .burn_roles(burn_roles!(
+                    burner => rule!(require(global_caller(component_address)));
+                    burner_updater => OWNER;
                 ))
                 .divisibility(DIVISIBILITY_NONE)
                 .mint_initial_supply(1);
@@ -1185,6 +1195,57 @@ mod tokenizer {
                 }            
 
                 net_returned
+            } else {
+                assert_pair("No Yield available".to_string());
+                let net_returned = self.tokenizer_vault.take(dec!(0));
+                return net_returned
+            }
+        }
+
+        #[doc = include_str!("../rtm/claim_supplied.rtm")]
+        /// ```     
+        pub fn claim_supplied( 
+            &mut self, 
+            userdata_nft_proof: Proof,
+            token_type: ResourceAddress
+        ) -> Bucket {
+
+            assert_resource(&userdata_nft_proof.resource_address(), &self.nft_manager.address());
+
+            // Update principal returned
+            let userdata_nft_proof = userdata_nft_proof.skip_checking();
+            let nft_local_id: NonFungibleLocalId = userdata_nft_proof.as_non_fungible().non_fungible_local_id();
+            let nfdata: UserMultiPosition = ResourceManager::from(userdata_nft_proof.resource_address()).get_non_fungible_data(&nft_local_id);
+            let mut liquidity_position = nfdata.liquidity_position;
+
+            if let Some(mut data) = liquidity_position.remove(&token_type) {
+                
+                let interest_totals = data.amount;
+                info!("Paying back interest {} ", interest_totals);   
+
+                //update claimed yield
+                data.amount = dec!(0);
+                // Insert the modified data back into the hashmap
+                liquidity_position.insert(token_type.clone(), data);
+                self.nft_manager.update_non_fungible_data(&nft_local_id, "liquidity_position", liquidity_position);     
+
+                //total net amount to return
+                let vault = self.collected.get_mut(&token_type.clone());
+
+                match vault {
+                    Some(fung_vault) => {
+                        info!("Returning tokens to the account, n°  {:?}", amount_returned);
+                        //getting tokens to be returned
+                        let bucket_returned = fung_vault.take(interest_totals);
+
+                        return bucket_returned.into()        
+                    }
+                    None => {
+                        assert_pair("Unavailable Vault".to_string());
+                        let token_received = self.tokenizer_vault.take(dec!(0));
+                        return token_received                      
+                    }
+                }
             } else {
                 assert_pair("No Yield available".to_string());
                 let net_returned = self.tokenizer_vault.take(dec!(0));
