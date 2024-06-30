@@ -9,8 +9,9 @@ CALL_METHOD
     Address("${admin_badge}")
     Decimal("1");
 CALL_METHOD
-    Address("${component}")
+    Address("${component}")    
     "set_reward"
+    Address("${token_type}")    
     Decimal("${amount_reward}")
 ;
 CALL_METHOD

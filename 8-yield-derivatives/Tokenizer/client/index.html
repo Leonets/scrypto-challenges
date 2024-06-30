@@ -87,13 +87,19 @@
       <div class="content-wrapper">
         <div class="row-wrapper">
           <div class="column" id="registerColumn">
-            <h3 id="registerColumn">By registering here you'll be able to supply liquidity and also tokenize your loan
-            </h3>
+            <h2 id="registerColumn">By registering here you'll be able to supply liquidity and also tokenize your loan</h2>
             <button id="register">Mint AccountData NFT</button>
             <p class="number" id="registerTxResult"></p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
           <div class="column" id="unregisterColumn">
-            <h3>If you want you can also remove your NFT</h3>
+            <h4>If you want you can also remove your NFT (Only for Stokenet testing)</h4>
             <button id="unregister">Burn AccountData NFT</button>
             <p class="number" id="unregisterTxResult"></p>
           </div>
@@ -113,6 +119,13 @@
               <option value="xETH">xETH</option>
               <option value="HUG">HUG</option>
             </select>
+          </div>
+
+          <div class="column center">
+            <p>You supplied <span class="number" id="tokenSupplied">0</span> tokens at epoch <span class="number" id="epochSupplied"></span> </p>
+            <p>You locked  <span class="number" id="tokenLocked">0</span> tokens at epoch <span class="number" id="epochLocked"></span> 
+            at an interest rates of <span class="number" id="tokenExtraRewardRate">0</span>% and that will get you <span class="number" id="tokenExtraRewardAmount">0</span> 
+            at maturity date</p>
           </div>
         </div>
       </div>
@@ -208,6 +221,7 @@
     </section>
   </main>
   </div>
+
 
 </body>
 

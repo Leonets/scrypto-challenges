@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mock.css">
+  <title>Tokenizer</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+
+<body class="animated-gradient">
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get the current date
+      var currentDate = new Date().toISOString().split('T')[0];
+
+      // Calculate the date 20 days from now
+      var maxDate = new Date();
+      maxDate.setDate(maxDate.getDate() + 20);
+      var maxDateString = maxDate.toISOString().split('T')[0];
+
+      // Set the minimum and maximum date values
+      document.getElementById("expectedTokenizeLength").setAttribute("value", currentDate);
+      document.getElementById("expectedTokenizeLength").setAttribute("min", currentDate);
+      document.getElementById("expectedTokenizeLength").setAttribute("max", maxDateString);
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+      function calculateExpectedLength(inputId, hiddenFieldId) {
+        // Get the current date
+        var currentDate = new Date();
+
+        // Get the selected date
+        var selectedDate = new Date(document.getElementById(inputId).value);
+
+        // Check if the date is valid
+        if (!isNaN(selectedDate.getTime())) {
+          // Calculate the difference in minutes
+          var differenceInMinutes = Math.round((selectedDate - currentDate) / (1000 * 60));
+
+          // Convert the difference into multiples of 5 minutes
+          var expectedLength = Math.round(differenceInMinutes / 5);
+          console.info("Expected Length:", expectedLength);
+
+          // Set the value in the hidden field
+          document.getElementById(hiddenFieldId).value = expectedLength;
+        } else {
+          // Handle invalid date input
+          console.error("Invalid date input");
+        }
+      }
+
+      // Add event listener for tokenize date input change
+      document.getElementById("tokenizeEndEpochBorrow").addEventListener("change", function () {
+        calculateExpectedLength("tokenizeEndEpochBorrow", "expectedTokenizeLength");
+      });
+
+    });    
+  </script>
+
+  <script type="module" src="js/gateway.ts"></script>
+  <script type="module" src="js/index.js"></script>
+  <script type="module" src="js/script.js"></script>
+  <script type="module" src="js/mock.js"></script>
+  <script type="module" src="js/popup.js"></script>
+
+  <header class="big-container header">
+    <div class="header-wrapper">
+      <h1> Tokenizer </h1>
+      <div>
+        <radix-connect-button class="connectBtn" />
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+
+
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column" id="registerColumn">
+            <h2 id="registerColumn">By registering here you'll be able to supply liquidity and also tokenize your loan</h2>
+            <button id="register">Mint AccountData NFT</button>
+            <p class="number" id="registerTxResult"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column" id="unregisterColumn">
+            <h4>If you want you can also remove your NFT (Only for Stokenet testing)</h4>
+            <button id="unregister">Burn AccountData NFT</button>
+            <p class="number" id="unregisterTxResult"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column center">
+            <h3>Choose the token you prefer to supply and tokenize !</h3>
+            <select id="currencySelect">
+              <option value="XRD">XRD</option>
+              <option value="USDC">USDC</option>
+              <option value="xWBTC">xWBTC</option>
+              <option value="xETH">xETH</option>
+              <option value="HUG">HUG</option>
+            </select>
+          </div>
+
+          <div class="column center">
+            <p>You supplied <span class="number" id="tokenSupplied">0</span> tokens at epoch <span class="number" id="epochSupplied"></span> </p>
+            <p>You locked  <span class="number" id="tokenLocked">0</span> tokens at epoch <span class="number" id="epochLocked"></span> 
+            at an interest rates of <span class="number" id="tokenExtraRewardRate">0</span>% and that will get you <span class="number" id="tokenExtraRewardAmount">0</span> 
+            at maturity date</p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <!-- Position Summary Mock Table to be studied about -->
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column center">
+            <h3>Position Summary</h3>
+        </div>
+        <div class="tabbed-panel">
+          <ul class="tabs">
+            <li class="tab-link active" data-tab="tab-supplied">Supplied</li>
+            <li class="tab-link" data-tab="tab-tokenized">Tokenized</li>
+          </ul>
+          <div id="tab-supplied" class="tab-content active">
+            <table>
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Amount</th>
+                  <th>Current API</th>
+                  <th>API Chart</th>
+                  <th>Supply Epoch</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>XRD</td><td>0</td><td><span class="number" id="rewardXRD">0</span>%</td><td>Chart</td><td>0</td></tr>
+                <tr><td>USDC</td><td>0</td><td><span class="number" id="rewardUSDC">0</span>%</td><td>Chart</td><td>0</td></tr>
+                <tr><td>xWBTC</td><td>0</td><td><span class="number" id="rewardWBTC">0</span>%</td><td>Chart</td><td>0</td></tr>
+                <tr><td>xETH</td><td>0</td><td><span class="number" id="rewardXETH">0</span>%</td><td>Chart</td><td>0</td></tr>
+                <tr><td>HUG</td><td>0</td><td><span class="number" id="rewardHUG">0</span>%</td><td>Chart</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="tab-tokenized" class="tab-content">
+            <table>
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Amount</th>
+                  <th>Maturity Date</th>
+                  <th>Extra Reward</th>
+                  <th>Current Extra</th>
+                  <th>Total Interest at maturity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>XRD</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+                </tr>
+                <tr>
+                  <td>USDC</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+                </tr>
+                <tr>
+                  <td>xWBTC</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+                </tr>
+                <tr>
+                  <td>xETH</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+                </tr>
+                <tr>
+                  <td>HUG</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- End Position Summary Mock table -->
+
+    <!-- Supply & Tokenized Mock Table to be studied about -->
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column center">
+            <h3>Operational Panel</h3>
+            <div id="buttonContainer">
+              <button class="token-button" data-token="XRD">XRD</button>
+              <button class="token-button" data-token="USDC">USDC</button>
+              <button class="token-button" data-token="xWBTC">xWBTC</button>
+              <button class="token-button" data-token="HUG">HUG</button>
+            </div>
+          </div>
+          <div class="tabbed-panel">
+            <ul class="tabs">
+              <li class="tab-link2 active" data-tab2="tab-supply-withdraw">Supply & Withdraw</li>
+              <li class="tab-link2" data-tab2="tab-tokenize-redeem">Tokenize & Redeem</li>
+            </ul>
+            <div id="tab-supply-withdraw" class="tab-content2 active">
+
+              <input type="hidden" placeholder="resource address chosen from the combo" id="resourceAddress">
+              <input type="hidden" placeholder="amount available in the wallet" id="amountAvailable">
+              <input type="hidden" placeholder="total value in the pool" id="totalValue">
+
+                <!--  POPUP ONLY -->
+                <div id="popup" class="popup" style="display: none;">
+                  <div class="popup-content">
+                      <span class="close">&times;</span>
+                      <h2 id="popupTitle"></h2>
+                      <form>
+                          <label for="resourceAddress">Resource Address:</label>
+                          <input type="text" id="resourceAddress" name="resourceAddress" required><br><br>
+                          <label for="amountAvailable">Amount Available:</label>
+                          <input type="number" id="amountAvailable" name="amountAvailable" required><br><br>
+                          <label for="totalValue">Total Value of the Pool:</label>
+                          <input type="number" id="totalValue" name="totalValue" required><br><br>
+                          <input type="text" placeholder="Enter amount">                  
+                          <input type="submit" value="Submit">
+                      </form>
+                  </div>
+              </div>
+              <!--  POPUP ONLY -->
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>Token</th>
+                    <th>Supply</th>
+                    <th>Withdraw</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>XRD</td>
+                    <td>
+                      <input type="text" placeholder="Enter amount">
+                      <button class="supply-button">Supply</button>
+                    </td>
+                    <td>
+                      <input type="text" placeholder="Enter amount">
+                      <button class="withdraw-button">Withdraw</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="tab-tokenize-redeem" class="tab-content2">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Token</th>
+                    <th>Tokenize</th>
+                    <th colspan="2">Redeem</th>
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Before Maturity</th>
+                    <th>After Maturity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>XRD</td>
+                    <td>
+                      <input type="text" placeholder="Enter amount" size="7">                      
+                      <input type="datetime-local" id="tokenizeEndEpochBorrow" name="tokenizeEndEpochBorrow" />
+                      <button class="tokenize-button">Tokenize</button>
+                    </td>
+                    <td>
+                      <button class="pt-yt-button" data-token="HUG">trade PT-YT</button>
+                    </td>                    
+                    <td>
+                      <button class="redeem-button">Redeem</button>
+                      <button class="redeem-button">Claim Yield</button>
+                    </td>                 
+                  </tr>
+                  <tr>
+                    <td>USDC</td>
+                    <td>
+                      <input type="text" placeholder="Enter amount" size="7">                      
+                      <input type="datetime-local" id="tokenizeEndEpochBorrow" name="tokenizeEndEpochBorrow" />
+                      <button class="tokenize-button">Tokenize</button>
+                    </td>
+                    <td>
+                      <button class="pt-yt-button" data-token="HUG">trade PT-YT</button>
+                    </td>                    
+                    <td>
+                      <button class="redeem-button">Redeem</button>
+                      <button class="redeem-button">Claim Yield</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>wBTC</td>
+                    <td>
+                      <input type="text" placeholder="Enter amount" size="7">                      
+                      <input type="datetime-local" id="tokenizeEndEpochBorrow" name="tokenizeEndEpochBorrow" />
+                      <button class="tokenize-button">Tokenize</button>
+                    </td>
+                    <td>
+                      <button class="pt-yt-button" data-token="HUG">trade PT-YT</button>
+                    </td>                    
+                    <td>
+                      <button class="redeem-button">Redeem</button>
+                      <button class="redeem-button">Claim Yield</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>HUG</td>
+                    <td>
+                      <input type="text" placeholder="Enter amount" size="7">                      
+                      <input type="datetime-local" id="tokenizeEndEpochBorrow" name="tokenizeEndEpochBorrow" />
+                      <button class="tokenize-button">Tokenize</button>
+                    </td>
+                    <td>
+                      <button class="pt-yt-button" data-token="HUG">trade PT-YT</button>
+                    </td>                    
+                    <td>
+                      <button class="redeem-button">Redeem</button>
+                      <button class="redeem-button">Claim Yield</button>
+                    </td>
+                  </tr>                                    
+                </tbody>
+              </table>
+            </div>
+          </div>          
+        </div>
+      </div>
+    </section>     
+    <!-- -->
+
+
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column">
+            <h3>Supply</h3> Current API <span class="number" id="currentReward"></span>
+            <p>Supplying liquidity you will receive TKN tokens back and also an updated NFT</p>
+            <button id="lendTokens">Supply</button>
+            <div class="number">
+              <input type="text" placeholder="Number of Token" id="numberOfTokens">
+            </div>
+            <p class="number" id="lendTxResult"></p>
+          </div>
+
+          <div class="column">
+            <h3>Withdraw</h3>
+            <p>Withdraw liquidity you'll get back your tokens plus a reward calculated over the time your funding has
+              been
+              provided!</p>
+            <button id="takes_back">Withdraw</button>
+            <div class="number">
+              <input type="text" placeholder="Number of Token" id="numberOfLndTokens">
+            </div>
+            <p class="number" id="takeBackTxResult"></p>
+          </div>
+
+          <div class="column">
+            <h3>Tokenize</h3> Current API <span class="number" id="currentExtraReward"></span>
+            <p>You can ‘tokenize’ your loan and you’ll get an extra percentage, fixed until the specified maturity date
+              <br>You can withdraw after maturity or you can swap before at a higher/lower value based on market
+              condition
+              !
+            </p>
+            <button id="tokenize">Tokenize</button>
+            <input type="text" placeholder="Number of Token" id="numberOfTokenizedZero">
+            <input type="hidden" placeholder="N° of epochs that the tokens will be locked" id="expectedTokenizeLength">
+            <div class="maturity-date">
+              <label for="tokenizeEndEpochBorrow">Choose the maturity date</label>
+              <input type="datetime-local" id="tokenizeEndEpochBorrow" name="tokenizeEndEpochBorrow" />
+            </div>
+            <input type="hidden" placeholder="Account address" id="accountAddress">
+          </div>
+          <p class="number" id="tokenizeTxResult"></p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column">
+            <div class="column">
+              <h3>Swap</h3>
+              <p>You can swap at a higher/lower value based on market condition (before maturity!) </p>
+              <button id="swap">Swap</button>
+              <div class="number">
+                <input type="text" placeholder="Number of Token" id="numberOfSwapXrdTokens">
+                <input type="hidden" placeholder="Account address" id="accountAddressForSwap">
+              </div>
+              <p class="number" id="SwapTxResult"></p>
+            </div>
+
+            <div class="column">
+              <h3>Redeem</h3>
+              <p>Redeems the underlying PT from PrincipalToken (after maturity!) </p>
+              <button id="redeem">Redeem</button>
+              <div class="number">
+                <input type="text" placeholder="Number of Token" id="numberOfRedeemedXrdTokens">
+                <input type="hidden" placeholder="Account address" id="accountAddressForRedeem">
+              </div>
+              <p class="number" id="redeemTxResult"></p>
+            </div>
+
+            <div class="column">
+              <h3>Claim Yield</h3>
+              <p>Claim yield and you get back the interest calculated at the time of tozeniking (after maturity!) </p>
+              <button id="claim">Claim</button>
+              <div class="number">
+                <input type="hidden" value="1" placeholder="Number of Token" id="numberOfClaimedXrdTokens">
+                <input type="hidden" placeholder="Account address" id="accountAddressForClaimed">
+              </div>
+              <p class="number" id="claimedTxResult"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+  </div>
+
+
+</body>
+
+</html>

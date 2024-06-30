@@ -16,7 +16,8 @@ if (environment == 'production') {
 }
 gwUrl = import.meta.env.VITE_GATEWAY_URL;
 dashboardUrl = import.meta.env.VITE_DASHBOARD_URL;
-let component = import.meta.env.VITE_COMP_ADDRESS
+let component = import.meta.env.VITE_COMP_ADDRESS;
+let userdata_nft = import.meta.env.VITE_USERDATA_NFT_RESOURCE_ADDRESS;
 console.log("gw url (gateway.js): ", gwUrl)
 console.log("dashboard url (gateway.js): ", dashboardUrl)
 console.log("component address (gateway.js): ", component)
@@ -40,29 +41,46 @@ export const rdt = RadixDappToolkit({
 // Global states
 let componentAddress = import.meta.env.VITE_COMP_ADDRESS //Component address on stokenet
 
+// selected token // default XRD for Stokenet test
+let selected_token = 'resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc';
+// NFT data about the account 
+// Be aware this is cached at the time the accounts logs in
+// This cached data needs to be refreshed each time the account executes an operation
+// This means that the cache expires after a supply, withdraw, tokenike and any other function
+export let cached_user_position: any;
+
 /**
  * Manage multi tokens by returning the token address based on the currency.
  */
-export function getTokenAddress(currency) {
+export function getTokenAddress(currency: string) {
+    console.log("getTokenAddress:", currency);
     if (currency === 'XRD') {
-        return 'resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc';
+        let addr = 'resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc';
+        selected_token = addr;
+        return addr;
     } else if (currency === 'USDC') {
-        return 'resource_tdx_2_1t5e5q2jsn9eqe5ma0gqtpfjzqcmchjze28rfyttzunu3pr6y6t06t7';
+        let addr = 'resource_tdx_2_1t5e5q2jsn9eqe5ma0gqtpfjzqcmchjze28rfyttzunu3pr6y6t06t7';
+        selected_token = addr;
+        return addr;
     } else if (currency === 'HUG') {
-      return 'resource_tdx_2_1tkna28k99gnj24ngqxvrcl7dh7lrqyr85496guk2zgprjhg8nkvs5h';
+        let addr = 'resource_tdx_2_1tkna28k99gnj24ngqxvrcl7dh7lrqyr85496guk2zgprjhg8nkvs5h';
+        selected_token = addr;
+        return addr;
     }  else if (currency === 'xWBTC') {
-      return 'resource_tdx_2_1t48fsfmh9kdfhdvge8x5dxee7u38wqcrjwesghjlks8lzmst725ccg';
+        let addr = 'resource_tdx_2_1t48fsfmh9kdfhdvge8x5dxee7u38wqcrjwesghjlks8lzmst725ccg';
+        selected_token = addr;
+        return addr;
     }  else if (currency === 'xETH') {
-      return 'resource_tdx_2_1tkjmydgvva5rl8x0lt9vn5lzpz2xh2d23klzjhv884hm9gg770l720';
+        let addr = 'resource_tdx_2_1tkjmydgvva5rl8x0lt9vn5lzpz2xh2d23klzjhv884hm9gg770l720';
+        selected_token = addr;
+        return addr;
     }
-
-    
-  
     // Return a default value or handle other cases as needed
     return '';
 }
 
 let accountAddress: string | null;
+export let fungibleId: string | null;
 
 // ************ Fetch the user's account address (Page Load) ************
 rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
@@ -80,17 +98,19 @@ const subscription = rdt.walletApi.walletData$.subscribe((walletData) => {
 
     // Store the accountAddress in localStorage
     localStorage.setItem('accountAddress', accountAddress);
+
+    interface Hashmap {
+      [key: string]: any;
+    }    
+    const hashmap: Hashmap = fetchComponentConfig(componentAddress)  
+    //get config parameter of the component
+    console.log("Hashmap:", hashmap);  
+
+    //fetch nft metadata info of the connected user
+    fetchUserPosition(accountAddress);
   }
 
-  interface Hashmap {
-    [key: string]: any;
-  }    
-  const hashmap: Hashmap = fetchComponentConfig(componentAddress)  
-  //get config parameter of the component
-  console.log("Hashmap:", hashmap);  
-
 })
-
 
 
 // *********** Fetch Component Config (/state/entity/details) (Gateway) ***********
@@ -115,6 +135,8 @@ export async function fetchComponentConfig(_componentAddress: any): Promise<Hash
     
     const currentEpoch = data.ledger_state.epoch;
 
+    console.log("json:", json);
+
     const rewardValue = getReward(json);
     const extrarewardValue = getExtraReward(json);
 
@@ -124,6 +146,30 @@ export async function fetchComponentConfig(_componentAddress: any): Promise<Hash
     if (currentRewardConfig) currentRewardConfig.textContent = rewardValue + '%' ?? '';
     if (currentExtraRewardConfig) currentExtraRewardConfig.textContent = extrarewardValue + '%' ?? '';
 
+    //extract values to fill in the new table
+    const mapOfRewards: Map<string, any> = getCurrentValues(json,"current_rewards");
+    const mapOfExtraRewards: Hashmap = getCurrentValues(json,"current_extra_rewards");
+    console.log("mapOfRewards:", mapOfRewards);
+    console.log("mapOfExtraRewards:", mapOfExtraRewards);
+
+    // Extract entries and convert them into a Map
+    const entriesArray = extractEntries(mapOfRewards.entries);
+    const extractedMap = new Map<string, number>();
+
+    entriesArray.forEach((entry: any) => {
+        const key = entry.key.value;
+        const value = parseFloat(entry.value.value); // Convert string to number if necessary
+        extractedMap.set(key, value);
+    });
+
+    // Log the map to verify
+    console.log("Extracted Map:", extractedMap);
+
+    const rewardXRD = document.getElementById("rewardXRD");
+    if (rewardXRD) rewardXRD.textContent = extractedMap.get("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc") ?? '';
+    const rewardUSDC = document.getElementById("rewardUSDC");
+    if (rewardUSDC) rewardUSDC.textContent = extractedMap.get("resource_tdx_2_1t57ejuayfdyrzn6wvzdw0u9lh5ae3u72c4pcxwmvvuf47q6jzk4xv2")  ?? '';
+
   })
   .catch(error => {
       console.error('Error fetching data:', error);
@@ -131,12 +177,22 @@ export async function fetchComponentConfig(_componentAddress: any): Promise<Hash
   return hashmap;
 }
 
+// Function to handle both array and iterable cases
+function extractEntries(entries: any): [string, number][] {
+  if (Array.isArray(entries)) {
+      return entries;
+  }
+  if (typeof entries === 'function') {
+      return Array.from(entries());
+  }
+  throw new Error("Unsupported entries format");
+}
 
 
 // ************ Utility Function (Gateway) *****************
 function generatePayload(method: string, _address: string, resource_address: string) {
   let code;
-  console.log("generatePayload for method:", method);
+  //console.log("generatePayload for method:", method);
   switch (method) {
     case 'ComponentConfig':
       console.log("generatePayload for method:", method);
@@ -157,6 +213,25 @@ function generatePayload(method: string, _address: string, resource_address: str
         }
       }`;
     break;   
+    case 'UserPosition':
+      console.log("generatePayload for method:", method);
+      code = `{
+        "addresses": [
+          "${accountAddress}"
+        ],
+        "aggregation_level": "Vault",
+        "opt_ins": {
+          "ancestor_identities": true,
+          "component_royalty_vault_balance": true,
+          "package_royalty_vault_balance": true,
+          "non_fungible_include_nfids": true,
+          "explicit_metadata": [
+            "name",
+            "description"
+          ]
+        }
+      }`;
+    break;       
     // Add more cases as needed
     default:
       throw new Error(`Unsupported method: ${method}`);
@@ -173,4 +248,187 @@ function getReward(data: { details: { state: { fields: any[]; }; }; }) {
 function getExtraReward(data: { details: { state: { fields: any[]; }; }; }) {
   const rewardField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "extra_reward");
   return rewardField ? rewardField.value : null;
+}
+
+function getCurrentValues(data: { details: { state: { fields: any[]; }; }; }, field_to_read: any): Map<string, any> {
+  const rewardField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === field_to_read);
+  return rewardField ? rewardField : null;
+}
+
+
+
+// *********** Fetch User NFT Metadata Information (/entity/details) (Gateway) ***********
+export async function fetchUserPosition(_accountAddress: string) {
+  // Define the data to be sent in the POST request.
+  const requestData = generatePayload("UserPosition", "", "Vault");
+  console.log("requestDat for entity/details:", requestData);
+
+  // Make an HTTP POST request to the gateway
+  fetch(gwUrl+'/state/entity/details', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: requestData,
+  })
+  .then(response => response.json()) // Assuming the response is JSON data.
+  .then(data => { 
+      const resourceAddress = `${userdata_nft}`;
+      const result = getVaultsByResourceAddress(data, resourceAddress);
+      console.log(" NFT id " + JSON.stringify(result));
+      //TODO controllare la presenza di items
+      const itemsArray = result && result.length>0 ? result[0].items : null
+      //todo check what happens when itemsArray has size > 1 (btw that should not happen)
+      fungibleId = itemsArray;
+      console.log(" itemsArray " + itemsArray);
+      // Loop through itemsArray and make GET requests for each item
+      itemsArray?.forEach(async (item: any) => {
+        await fetchNftMetadata(resourceAddress, item);
+      });
+  })
+  .catch(error => {
+      console.error('Error fetching data:', error);
+  });
+}
+
+
+
+// *********** Fetch User NFT Metadata Information (Filtering response) (Gateway Utility) ***********
+function getVaultsByResourceAddress(jsonData: { items: never[]; }, resourceAddress: string) {
+  const items = jsonData.items || [];
+  // Filter items based on the resource_address
+  const filteredItems = items.filter((item: { non_fungible_resources: { items: any[]; }; }) => {
+    return (
+      item.non_fungible_resources &&
+      item.non_fungible_resources.items &&
+      item.non_fungible_resources.items.length > 0 &&
+      item.non_fungible_resources.items.some(
+        (        resource: { resource_address: any; }) =>
+          resource.resource_address &&
+          resource.resource_address === resourceAddress
+      )
+    );
+  });
+
+  // Extract vaults from the filtered items
+  const vaults = filteredItems.reduce((result: any[], item: { non_fungible_resources: { items: any[]; }; }) => {
+    if (
+      item.non_fungible_resources &&
+      item.non_fungible_resources.items &&
+      item.non_fungible_resources.items.length > 0
+    ) {
+      const matchingResources = item.non_fungible_resources.items.filter(
+        (        resource: { resource_address: any; }) =>
+          resource.resource_address &&
+          resource.resource_address === resourceAddress
+      );
+      
+      matchingResources.forEach((resource: { vaults: { total_count: number; items: any; }; }) => {
+        if (resource.vaults && resource.vaults.total_count > 0) {
+          result.push(...resource.vaults.items);
+        }
+      });
+    }
+    return result;
+  }, []);
+
+  return vaults;
+}
+
+
+
+// *********** Fetch User NFT Metadata Information (/non-fungible/data) (Gateway Utility) ***********
+async function fetchNftMetadata(resourceAddress: string, item: any) {
+  // Define the data to be sent in the GET request.
+  const requestData = `{
+    "resource_address": "${resourceAddress}",
+    "non_fungible_ids": [
+      "${item}"
+    ]
+  }`;
+
+  // Make an HTTP POST request to the gateway
+  fetch(gwUrl+'/state/non-fungible/data', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: requestData,
+  })
+  .then(response => response.json()) 
+  .then(data => { 
+    //Inner function moved
+    manageData(data);
+    //In case you need something else you can do it here
+    
+  })
+  .catch(error => {
+      console.error('Error fetching data:', error);
+  });
+}
+
+// *********** Read NFT (Gateway Utility) ***********
+// This is for getting data out the NFT 
+export function manageData(data: any) {
+      cached_user_position = data;
+      let token = selected_token;
+      console.info('UserPosition, extract info about token = ', token);
+      const extractedFields = extractFieldsFromJsonString(data, token);
+  
+      // Liquidity Data
+      console.log(" amount ? " + extractedFields.amount);
+      console.log(" epoch ? " + extractedFields.start_supply_epoch);
+      console.log(" epoch ? " + extractedFields.end_supply_epoch);
+      // Tokenized Data
+      console.log(" tok. amount ? " + extractedFields.underlying_amount);
+      console.log(" tok. extra ? " + extractedFields.extra_reward);
+      console.log(" tok. claimed ? " + extractedFields.yield_claimed);
+      console.log(" tok. maturity ? " + extractedFields.maturity_date);
+      console.log(" tok. interest ? " + extractedFields.interest_totals);
+      console.log(" tok. returned ? " + extractedFields.principal_returned);
+
+      console.info('cached_user_position does exist ?  = ', cached_user_position);
+
+      // Find the elements by their IDs
+      const tokenSuppliedDiv = document.getElementById("tokenSupplied");
+      const epochSuppliedDiv = document.getElementById("epochSupplied");
+      const tokenLockedDiv = document.getElementById("tokenLocked");
+      const epochLockedDiv = document.getElementById("epochLocked");
+      const tokenExtraRewardRateDiv = document.getElementById("tokenExtraRewardRate");
+      const tokenExtraRewardAmountDiv = document.getElementById("tokenExtraRewardAmount");
+      // Update the content of the div elements about Your Position (Liquidity)
+      tokenSuppliedDiv!.textContent = extractedFields.amount;
+      epochSuppliedDiv!.textContent = extractedFields.start_supply_epoch;
+      // Update the content of the div elements about Your Position (Tokenized)
+      tokenLockedDiv!.textContent = extractedFields.underlying_amount;
+      epochLockedDiv!.textContent = extractedFields.maturity_date;
+      tokenExtraRewardRateDiv!.textContent = extractedFields.extra_reward;
+      tokenExtraRewardAmountDiv!.textContent = extractedFields.interest_totals;
+
+}
+
+// Working with a simple String object
+// Function to extract fields based on the target key
+function extractFieldsFromJsonString(json: any, targetKey: string) {
+  const result: { [key: string]: string } = {};
+
+  if (json.non_fungible_ids && json.non_fungible_ids.length > 0) {
+     // Directly access the first (and only) element
+     // This needs to be checked  
+      const nonFungible = json.non_fungible_ids[0];
+
+      nonFungible.data.programmatic_json.fields.forEach((field: any) => {
+          field.entries.forEach((entry: any) => {
+              if (entry.key.value === targetKey) {
+                  entry.value.fields.forEach((valueField: any) => {
+                      result[valueField.field_name] = valueField.value;
+                  });
+              }
+          });
+      });
+  } else {
+      console.error("non_fungible_ids is undefined or empty");
+  }
+
+  return result;
 }

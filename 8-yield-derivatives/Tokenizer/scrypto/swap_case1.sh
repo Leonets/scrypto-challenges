@@ -90,6 +90,9 @@ resim run rtm/register.rtm
 
 export resource_address=resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3
 
+export fungibleId=$(resim show $account | awk '/Tokenizer AccountData/{flag=1; next} /resource_sim1/ && flag{flag=0} flag' | sed -n 's/^[[:space:]]*└─ //p')
+
+export token_type=$xrd
 export amount_reward='10'
 echo '>>> Set Reward '$amount_reward' at epoch 1'
 resim set-current-epoch 1
@@ -118,9 +121,9 @@ resim run rtm/set_extra.rtm
 
 # Trading before the maturity date causes the account to get more tokens than were deposited due to the fact that the interest rate has decreased
 # The opposite happens if instead the interest rates rises
-echo '>>> Redeem'
+echo '>>> Trade'
 export amount='10000'
-resim run rtm/redeem.rtm
+resim run rtm/trade.rtm
 
 
 resim show $account

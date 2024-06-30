@@ -59,7 +59,7 @@ ResultAsync.combine([
   loadBinaryFromPath('/scrypto/target/wasm32-unknown-unknown/release/tokenizer.rpd'),
 ])
   .andThen(([wasmBuffer, rpdBuffer]) =>
-    deployPackage({ wasmBuffer, rpdBuffer, lockFee: 200 })
+    deployPackage({ wasmBuffer, rpdBuffer, lockFee: 1000 })
   )
   .andThen((result) => {
     logger.info('Deployed package', result)

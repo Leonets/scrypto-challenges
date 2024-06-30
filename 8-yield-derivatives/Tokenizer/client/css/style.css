@@ -173,6 +173,23 @@ section {
   backdrop-filter: blur(10px);
 }
 
+.row-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+#buttonContainer{
+  max-width: 400px;
+  width: 100%;
+  display: flex; /* Use flexbox to arrange items in a row */
+  flex-wrap: nowrap; /* Prevent wrapping to the next line */
+  gap: 10px; /* Add some space between the buttons */
+}
+
 .maturity-date {
   display: flex;
   flex-direction: column;
@@ -196,14 +213,7 @@ section {
 }
 
 
-.row-wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0.5rem;
-}
+
 
 .feedback-wrapper {
   display: flex;
@@ -275,12 +285,3 @@ li a {
     flex-direction: column;
   }
 }
-
-
-
-
-
-
-
-
-

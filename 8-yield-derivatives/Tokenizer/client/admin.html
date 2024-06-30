@@ -12,6 +12,7 @@
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <script type="module" src="js/admin.js"></script>
+  <script type="module" src="js/script-admin.js"></script>
 
   <div class="big-container header">
     <div class="header-wrapper" >
@@ -25,6 +26,24 @@
   </div>
 
   <input type="hidden" placeholder="Account address" id="accountAddress">
+
+  <section>
+    <div class="content-wrapper">
+      <div class="row-wrapper">
+        <div class="column center">
+          <h3>Choose the token you have to configure !</h3>
+          <select id="currencySelect">
+            <option value="XRD">XRD</option>
+            <option value="USDC">USDC</option>
+            <option value="xWBTC">xWBTC</option>
+            <option value="xETH">xETH</option>
+            <option value="HUG">HUG</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
   
   <section>
     <div class="content-wrapper">    
@@ -46,6 +65,7 @@
         <input type="text"  size="80" placeholder="Maximum tokenize length expressed in epochs (default=518000)" id="tokenized_epoch_max_lenght"><br>
         <input type="text"  size="80" placeholder="Minimu number of tokens that can be supplied (default=1)" id="min_loan_limit"><br>
         <input type="text"  size="80" placeholder="Maximum number of tokens that can be supplied (default=100000)" id="max_loan_limit"><br>
+        <input type="text"  size="80" placeholder="Resource address of the token you are configuring (default=XRD)" id="resource_address"><br>
       </div>
       <p><button id="config">Config</button></p>
 

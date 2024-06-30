@@ -76,6 +76,8 @@ resim run rtm/register.rtm
 
 export resource_address=resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3
 
+export fungibleId=$(resim show $account | awk '/Tokenizer AccountData/{flag=1; next} /resource_sim1/ && flag{flag=0} flag' | sed -n 's/^[[:space:]]*└─ //p')
+
 export amount='4000'
 echo '>>> Supply tokens (amount '$amount') of type xrd'
 resim set-current-epoch 1
@@ -83,6 +85,7 @@ resim run rtm/supply_high.rtm
 
 # 4000 xrd supplied in
 
+export token_type=$xrd
 export amount_reward='4'
 echo '>>> Set Reward '$amount_reward' at epoch 100'
 resim set-current-epoch 100
@@ -121,7 +124,7 @@ resim run rtm/set_extra.rtm
 
 export amount='2000'
 echo '>>> Redeem amount ' $amount
-resim run rtm/redeem.rtm
+resim run rtm/trade.rtm
 
 # 2000 xrd swapped
 echo 'Result after swapping after the interest rate drops'
@@ -144,7 +147,7 @@ resim run rtm/set_extra.rtm
 
 export amount='2000'
 echo '>>> Redeem amount ' $amount
-resim run rtm/redeem.rtm
+resim run rtm/trade.rtm
 
 # 2000 xrd swapped
 echo 'Result after swapping after the interest rate rise'

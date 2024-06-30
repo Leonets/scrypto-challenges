@@ -77,6 +77,8 @@ resim run rtm/register.rtm
 
 export resource_address=resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3
 
+export fungibleId=$(resim show $account | awk '/Tokenizer AccountData/{flag=1; next} /resource_sim1/ && flag{flag=0} flag' | sed -n 's/^[[:space:]]*└─ //p')
+
 export amount='4000'
 echo '>>> Supply tokens (amount '$amount') of type xrd'
 resim set-current-epoch 1
@@ -92,6 +94,7 @@ resim run rtm/supply_high.rtm
 # 4000 xrd and 4000 demo1 supplied in
 # 8000 tkn
 
+export token_type=$demo1
 export amount_reward='4'
 echo '>>> Set Reward '$amount_reward' at epoch 100'
 resim set-current-epoch 100
@@ -106,6 +109,25 @@ export amount_reward='12'
 echo '>>> Set Reward '$amount_reward' at epoch 2500'
 resim set-current-epoch 2500
 resim run rtm/set_reward.rtm
+
+# I need to set the reward twice for the second token address
+# Fix this
+export token_type=$xrd
+export amount_reward='4'
+echo '>>> Set Reward '$amount_reward' at epoch 100'
+resim set-current-epoch 100
+resim run rtm/set_reward.rtm
+
+export amount_reward='8'
+echo '>>> Set Reward '$amount_reward' at epoch 1000'
+resim set-current-epoch 1000
+resim run rtm/set_reward.rtm
+
+export amount_reward='12'
+echo '>>> Set Reward '$amount_reward' at epoch 2500'
+resim set-current-epoch 2500
+resim run rtm/set_reward.rtm
+# End Fix this
 
 export amount='2000'
 export length='4000'
@@ -125,14 +147,15 @@ resim show $account
 # 8000 tkn
 # 2000 xrd and 2000 demo1 tokenized
 
-# echo '>>> Redeem'
+# echo '>>> Trade'
 
 # resim set-current-epoch 200
 # #resim call-method ${component} tokenize_yield $xrd:100
-# resim run rtm/redeem.rtm
+# resim run rtm/trade.rtm
 
 # resim show $account
 
+export token_type=$demo1
 export amount_reward='6'
 echo '>>> Set Reward '$amount_reward' at epoch 6000'
 resim set-current-epoch 6000
@@ -142,6 +165,20 @@ export amount_reward='3'
 echo '>>> Set Reward '$amount_reward' at epoch 7000'
 resim set-current-epoch 7000
 resim run rtm/set_reward.rtm
+
+# I need to set the reward twice for the second token address
+# Fix this
+export token_type=$xrd
+export amount_reward='6'
+echo '>>> Set Reward '$amount_reward' at epoch 6000'
+resim set-current-epoch 6000
+resim run rtm/set_reward.rtm
+
+export amount_reward='3'
+echo '>>> Set Reward '$amount_reward' at epoch 7000'
+resim set-current-epoch 7000
+resim run rtm/set_reward.rtm
+# Fix this
 
 export amount='50'
 echo '>>> redeem_from_pt (After Maturity) (amount '$amount')'

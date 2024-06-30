@@ -10,5 +10,8 @@ currencySelect.addEventListener('change', function() {
     let newTokenAddress = getTokenAddress(currencySelect.value);
     console.log(`current token address ${newTokenAddress} `);
     // set the data from the NFT in the corresponding section in the web page
-    manageData(cached_user_position);
+    //manageData(cached_user_position);
+
+    const resource_address = document.getElementById("resource_address");
+    resource_address.value = newTokenAddress;
 });

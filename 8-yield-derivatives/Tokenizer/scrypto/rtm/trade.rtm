@@ -1,4 +1,9 @@
 CALL_METHOD
+    Address("${component_test}")
+    "lock_fee"
+    Decimal("5000")
+;
+CALL_METHOD
     Address("${account}")
     "withdraw"
     Address("${pt}")
@@ -11,20 +16,17 @@ TAKE_FROM_WORKTOP
 ;
 CALL_METHOD
     Address("${account}")
-    "withdraw"
+    "create_proof_of_non_fungibles"
     Address("${userdata_nft_manager}")
-    Decimal("1")
-;
-TAKE_FROM_WORKTOP
-    Address("${userdata_nft_manager}")
-    Decimal("1")
-    Bucket("bucket2")
-;
+    Array<NonFungibleLocalId>(NonFungibleLocalId("${fungibleId}"));
+POP_FROM_AUTH_ZONE
+    Proof("MyNFTData");
 CALL_METHOD
     Address("${component}")
-    "redeem"
+    "trade"
     Bucket("bucket1")
-    Bucket("bucket2")
+    Proof("MyNFTData")
+    # Bucket("bucket2")
     Address("${resource_address}")
 ;
 CALL_METHOD

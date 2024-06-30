@@ -1,0 +1,112 @@
+/* style for mock table */
+.tabbed-panel {
+  margin-top: 20px;
+}
+
+.tabs {
+  list-style: none;
+  padding: 0;
+  display: flex;
+}
+
+.tab-link {
+  padding: 10px 20px;
+  cursor: pointer;
+  background: #d0d0d0;
+  margin-right: 5px;
+}
+
+.tab-link.active {
+  background: #f0f0f0;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Token button */
+.token-button {
+  background-color: #008cba; /* Blue */
+  font-size: 18px;
+  color: white;
+  display: inline-block; /* Make buttons inline-block to fit them in a row */
+  padding: 10px 20px; /* Adjust padding as needed */
+  margin: 0; /* Ensure no extra margin is added */
+}
+
+
+/* Specific styles for YT, PT, and PT + YT buttons */
+.yt-button {
+  background-color: #4caf50; /* Green */
+  font-size: 12px;
+  color: white;
+}
+
+.yt-button:hover {
+  background-color: #45a049;
+}
+
+.pt-button {
+  background-color: #008cba; /* Blue */
+  font-size: 12px;
+  color: white;
+}
+
+.pt-button:hover {
+  background-color: #007bb5;
+}
+
+.pt-yt-button {
+  background-color: #f44336; /* Red */
+  font-size: 12px;
+  color: white;
+}
+
+.pt-yt-button:hover {
+  background-color: #e41e10;
+}
+
+/* table 2 */
+.tab-link2 {
+  padding: 10px 20px;
+  cursor: pointer;
+  background: #d0d0d0;
+  margin-right: 5px;
+}
+
+.tab-link2.active {
+  background: #f0f0f0;
+}
+
+.tab-content2 {
+  display: none;
+}
+
+.tab-content2.active {
+  display: block;
+}
+
+
+
+
+
+
+
+
+

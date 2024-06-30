@@ -74,6 +74,13 @@ export account=$owner_account
 echo '>>> Register'
 resim run rtm/register.rtm
 
+export fungibleId=$(resim show $account | awk '/Tokenizer AccountData/{flag=1; next} /resource_sim1/ && flag{flag=0} flag' | sed -n 's/^[[:space:]]*└─ //p')
+
+echo '>>> Fungible Id of the UserAccountData'
+echo $fungibleId
+
+echo '>>> Owner Account'
+resim show $owner_account
 
 export resource_address=resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3
 
@@ -86,6 +93,12 @@ resim run rtm/supply_high.rtm
 echo '>>> Add Token 3'
 export token=$demo2
 resim run rtm/add_token.rtm
+
+export token_type=$demo2
+export amount_reward='8'
+echo '>>> Set Reward '$amount_reward' at epoch 1'
+resim set-current-epoch 1
+resim run rtm/set_reward.rtm
 
 echo '>>> Supply 4000 Tokens of a different type'
 export resource_address=$token

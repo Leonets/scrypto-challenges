@@ -60,3 +60,10 @@ echo ' > pt'
 resim show $pt
 echo ' > yt'
 resim show $yt
+
+export account=$owner_account
+echo '>>> Register'
+resim run rtm/register.rtm
+
+
+resim show $owner_account

@@ -167,15 +167,18 @@ pub fn epoch_min(tokenize_epochs_requested: Decimal){
 /// - `total_amount`: Total amount of the reward
 /// 
 pub fn calculate_interests(
-    reward_type: &String, 
-    reward_fixed: &Decimal, 
+    // reward_type: &String, 
+    // reward_fixed: &Decimal, 
     start_lending_epoch: u64, 
     amount_to_be_returned: &Decimal, 
     interest_for_suppliers: &AvlTree<Decimal, Decimal>) -> Decimal {
 
+    //remove this
+    let reward_type = "TimeBased";
+    let fixed = dec!(0); 
+
     // Dereference the Decimal values
     let amount = *amount_to_be_returned;
-    let fixed = *reward_fixed;
     let current_epoch = Runtime::current_epoch().number(); 
         
     //calculate interest to be repaied with specified reward type 
@@ -273,3 +276,4 @@ impl FromStr for Reward {
         }
     }
 }
+

@@ -291,7 +291,7 @@ Then, you can execute all the following transaction manifest:
 
 - [redeem from pt](scrypto/stokenet/redeem_from_pt.rtm) -> redeem from principal token
 
-- [swap](scrypto/stokenet/redeem.rtm) -> swap principal token and yield
+- [swap](scrypto/stokenet/trade.rtm) -> swap principal token and yield
 
 - [register](scrypto/stokenet/register.rtm) -> register account
 
@@ -402,3 +402,38 @@ COSTS OR OTHER LIABILITY OF ANY NATURE WHATSOEVER, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE, MISUSE OR OTHER DEALINGS IN THE SOFTWARE. THE AUTHORS SHALL
 OWE NO DUTY OF CARE OR FIDUCIARY DUTIES TO USERS OF THE SOFTWARE.
+
+
+# Manual Test from Command Line
+
+$ resim publish .
+   Compiling tokenizer v0.1.0 (C:\Projects\Radix\scrypto-challenges-fork\8-yield-derivatives\Tokenizer\scrypto)
+    Finished release [optimized] target(s) in 10.42s
+   Compiling tokenizer v0.1.0 (C:\Projects\Radix\scrypto-challenges-fork\8-yield-derivatives\Tokenizer\scrypto)
+    Finished release [optimized] target(s) in 8.03s
+Success! New Package: package_sim1ph0cxfw0rlajunyl7mgr5rujyqgjn378afq4h979murgfzsgzg5kkd
+
+$ export package=package_sim1ph0cxfw0rlajunyl7mgr5rujyqgjn378afq4h979murgfzsgzg5kkd
+
+$ export xrd=resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3
+
+$ resim new-account
+A new account has been created!
+Account component address: account_sim1c9ha0t0vkqr30xwnnaz3duz6qajcl7ewxezh0dyux370rh0tg92a0u
+Public key: 03ed69b0899af75f78a2cf4fe97ee442f452b4e20b6080c889e7ffe91d1bde16cb
+Private key: 56ae30165ec1ac25e9640e052ff69d55c99355587739782f1cd1dda1566e465d
+Owner badge: resource_sim1n22nkwqck09vdh8rva8vjxgq38pwtznxvhatfjy8yk0cs8s3z0a7dl:#1#
+
+$ export account=account_sim1c9ha0t0vkqr30xwnnaz3duz6qajcl7ewxezh0dyux370rh0tg92a0u
+
+$ resim call-function ${package} ZeroCollateral instantiate 5 10 LND 1728 timebased 1000
+BlueprintNotFound(PackageAddress(0ddf8325cf1ffb2e4c9ff6d03a0f92201129c7c7ea415b97c5df06848a08), "ZeroCollateral")
+
+$ export component_test=component_sim1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxhkrefh
+
+$ export demo1=$(resim new-token-fixed --name "DEMO1" 100000 --symbol "DEMO1" | sed -nr "s/└─ Resource: ([[:alnum:]_]+)/\1/p")
+
+$ echo $demo1
+resource_sim1t5uj2pz54p0n5qmrcl5zhfrzz34yv3tucvyz2u3ptj66dhswgat254
+
+$ resim call-function $dapp_package Tokenizer instantiate 5 TKN timebased $xrd $demo1
